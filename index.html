@@ -662,7 +662,7 @@
             </label>
 
             <label class="checkbox-field include-cf-field">
-              <input id="include-later-cf" type="checkbox" checked>
+              <input id="include-later-cf" type="checkbox">
               <span>Include later cf. references</span>
             </label>
           </div>
@@ -1313,34 +1313,22 @@
 
       if (spoiler) {
         const isWithinCutoff = cutoffSql(spoiler);
-
-        spoilerClause = spoiler.includeLaterCf
-          ? `
-            AND list_count(pages) > 0
-            AND list_bool_or(
-              list_transform(
-                pages,
-                lambda p: NOT COALESCE(p.is_parenthesized, false)
-              )
-            )
-            AND list_bool_and(
-              list_transform(
-                pages,
-                lambda p:
-                  COALESCE(p.is_parenthesized, false)
-                  OR ${isWithinCutoff}
-              )
-            )
-          `
+        const isEligibleCitation = spoiler.includeLaterCf
+          ? isWithinCutoff
           : `
-            AND list_count(pages) > 0
-            AND list_bool_and(
-              list_transform(
-                pages,
-                lambda p: ${isWithinCutoff}
-              )
-            )
+            NOT COALESCE(p.is_parenthesized, false)
+            AND ${isWithinCutoff}
           `;
+
+        spoilerClause = `
+          AND list_count(pages) > 0
+          AND list_bool_or(
+            list_transform(
+              pages,
+              lambda p: ${isEligibleCitation}
+            )
+          )
+        `;
       }
 
       const sql = `
@@ -1638,7 +1626,7 @@
         }
 
         includeLaterCfInput.checked =
-          includeLaterCf !== "0" && includeLaterCf !== "false";
+          includeLaterCf === "1" || includeLaterCf === "true";
         syncSpoilerFields();
 
         const initialMode =

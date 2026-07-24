@@ -199,6 +199,14 @@
       display: contents;
     }
 
+    .page-section-filters {
+      display: flex;
+      grid-column: 1 / -1;
+      align-items: center;
+      gap: 24px;
+      margin-top: 2px;
+    }
+
     input:not([type="checkbox"]),
     select,
     .search-button {
@@ -507,6 +515,12 @@
         gap: 12px;
       }
 
+      .page-section-filters {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px 12px;
+      }
+
       .search-button {
         width: 100%;
       }
@@ -715,6 +729,52 @@
           >
             Search guide
           </button>
+
+          <div
+            class="page-section-filters"
+            role="group"
+            aria-label="Entry types"
+          >
+            <label class="checkbox-field">
+              <input
+                name="page-section"
+                type="checkbox"
+                value="characters"
+                checked
+              >
+              <span>Characters</span>
+            </label>
+
+            <label class="checkbox-field">
+              <input
+                name="page-section"
+                type="checkbox"
+                value="persons"
+                checked
+              >
+              <span>Persons</span>
+            </label>
+
+            <label class="checkbox-field">
+              <input
+                name="page-section"
+                type="checkbox"
+                value="places"
+                checked
+              >
+              <span>Places</span>
+            </label>
+
+            <label class="checkbox-field">
+              <input
+                name="page-section"
+                type="checkbox"
+                value="themes"
+                checked
+              >
+              <span>Themes</span>
+            </label>
+          </div>
         </form>
       </div>
 
@@ -768,6 +828,12 @@
     const PARQUET_FILE = "a_guide_to_proust.parquet";
     const VOLUMES = ["I", "II", "III", "IV", "V", "VI"];
     const VALID_VOLUMES = new Set(VOLUMES);
+    const PAGE_SECTIONS = new Map([
+      ["characters", "Index of Characters"],
+      ["persons", "Index of Persons"],
+      ["places", "Index of Places"],
+      ["themes", "Index of Themes"]
+    ]);
 
     const tabs = [...document.querySelectorAll(".search-tab")];
     const entryTab = document.querySelector("#entry-tab");
@@ -787,6 +853,9 @@
     const pageStartInput = document.querySelector("#page-start");
     const pageEndInput = document.querySelector("#page-end");
     const pageSearchButton = document.querySelector("#page-search-button");
+    const pageSectionInputs = [
+      ...document.querySelectorAll('input[name="page-section"]')
+    ];
     const formHelp = document.querySelector("#form-help");
     const status = document.querySelector("#status");
     const resultsSummary = document.querySelector("#results-summary");
@@ -921,6 +990,12 @@
       }
 
       return { start, end };
+    }
+
+    function selectedPageSections() {
+      return pageSectionInputs
+        .filter((input) => input.checked && PAGE_SECTIONS.has(input.value))
+        .map((input) => input.value);
     }
 
     function parseEntrySearch() {
@@ -1160,13 +1235,22 @@
       });
     }
 
-    async function searchByPage(volume, range) {
+    async function searchByPage(volume, range, sectionKeys) {
       /*
        * The values interpolated below are safe:
        * volume is restricted to VALID_VOLUMES, and
        * start/end are validated positive integers.
        */
       const storedVolume = `**${volume}**`;
+      const sectionNames = sectionKeys.map((key) => PAGE_SECTIONS.get(key));
+      const sectionClause =
+        sectionNames.length === PAGE_SECTIONS.size
+          ? ""
+          : sectionNames.length === 0
+            ? "AND false"
+            : `AND section IN (${sectionNames
+                .map((name) => `'${name}'`)
+                .join(", ")})`;
 
       const sql = `
         SELECT
@@ -1185,6 +1269,7 @@
               AND COALESCE(p.page_end, p.page_start) >= ${range.start}
           )
         )
+        ${sectionClause}
         ORDER BY row_number, reference_index
       `;
 
@@ -1288,7 +1373,7 @@
       }
     }
 
-    function updatePageUrl(volume, range) {
+    function updatePageUrl(volume, range, sectionKeys) {
       const url = new URL(window.location.href);
 
       url.searchParams.set("mode", "page");
@@ -1299,6 +1384,15 @@
           ? String(range.start)
           : `${range.start}-${range.end}`
       );
+
+      if (sectionKeys.length === PAGE_SECTIONS.size) {
+        url.searchParams.delete("sections");
+      } else {
+        url.searchParams.set(
+          "sections",
+          sectionKeys.length > 0 ? sectionKeys.join(",") : "none"
+        );
+      }
 
       window.history.replaceState({}, "", url);
     }
@@ -1336,14 +1430,15 @@
         }
 
         const range = parsePageRange();
+        const sectionKeys = selectedPageSections();
 
         setSearchButtonsDisabled(true);
         setStatus("Searching…", "loading");
 
-        const rows = await searchByPage(volume, range);
+        const rows = await searchByPage(volume, range, sectionKeys);
 
         renderPageRows(rows, volume, range);
-        updatePageUrl(volume, range);
+        updatePageUrl(volume, range, sectionKeys);
         setStatus("Index ready", "ready");
       } catch (error) {
         const message =
@@ -1491,6 +1586,7 @@
         const initialEntry = params.get("entry");
         const initialVolume = params.get("volume");
         const initialPages = params.get("pages");
+        const initialSections = params.get("sections");
         const throughVolume = params.get("through_volume");
         const throughPage = params.get("through_page");
         const includeLaterCf = params.get("include_later_cf");
@@ -1511,6 +1607,18 @@
                 : String(range.end);
           } catch (error) {
             initialPageError = error;
+          }
+        }
+
+        if (initialSections !== null) {
+          const selectedKeys = new Set(
+            initialSections === "none"
+              ? []
+              : initialSections.split(",").filter((key) => PAGE_SECTIONS.has(key))
+          );
+
+          for (const input of pageSectionInputs) {
+            input.checked = selectedKeys.has(input.value);
           }
         }
 

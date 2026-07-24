@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
 
   <meta
     name="description"
@@ -646,7 +647,7 @@
                 aria-controls="spoiler-fields"
                 checked
               >
-              <span>Limit spoilers</span>
+              <span>Hide spoilers based on current volume/page</span>
             </label>
 
             <label class="checkbox-field include-cf-field">
@@ -794,8 +795,8 @@
 
       <div class="results">
         <div class="message">
-          <h2>Read with the index beside you</h2>
-          <p>Your search runs privately in this browser with DuckDB.</p>
+          <h2>Search the guide</h2>
+          <p>Your matching references will appear here.</p>
         </div>
       </div>
     </section>
@@ -818,8 +819,8 @@
 
       <div class="results">
         <div class="message">
-          <h2>Look up your current page</h2>
-          <p>Choose a volume and page to find its guide references.</p>
+          <h2>Search the guide</h2>
+          <p>Your matching references will appear here.</p>
         </div>
       </div>
     </section>
@@ -1254,9 +1255,9 @@
       renderRows("page", rows, {
         kicker: "Entry lookup",
         title: `Entries mentioned in Volume ${volume}, ${pageWord} ${pageLabel}`,
-        emptyTitle: "No references found",
+        emptyTitle: "No matching references found",
         emptyText:
-          "Try a nearby page or check that the selected volume matches your edition."
+          "Try another page or adjust the entry type filters."
       });
     }
 
@@ -1268,12 +1269,10 @@
       renderRows("entry", rows, {
         kicker: "Entry lookup",
         title: `Entries matching “${name}”${cutoff}`,
-        emptyTitle: spoiler
-          ? "No spoiler-safe references found"
-          : "No matching references found",
+        emptyTitle: "No matching references found",
         emptyText: spoiler
-          ? "No matching references occur within your current reading position."
-          : "Try a shorter name or check the spelling."
+          ? "Try another entry name or adjust the spoiler limit."
+          : "Try another entry name or check the spelling."
       });
     }
 

@@ -6,10 +6,10 @@
 
   <meta
     name="description"
-    content="Search A Guide to Proust by volume and page."
+    content="Search A Guide to Proust by entry name, volume, and page."
   >
 
-  <title>A Guide to Proust — Page Index</title>
+  <title>A Guide to Proust — Search</title>
 
   <style>
     :root {
@@ -109,7 +109,45 @@
       box-shadow: 0 8px 28px #3b2b1b12;
     }
 
-    form {
+    .search-tabs {
+      display: flex;
+      gap: 0;
+      margin: -6px -6px 22px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .search-tab {
+      height: 44px;
+      padding: 0 18px;
+      border: 0;
+      border-bottom: 3px solid transparent;
+      border-radius: 0;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font: 750 0.78rem/1 system-ui, sans-serif;
+      letter-spacing: 0;
+    }
+
+    .search-tab:hover {
+      color: var(--accent);
+    }
+
+    .search-tab[aria-selected="true"] {
+      border-bottom-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .search-tab:focus-visible {
+      outline: 3px solid #7c302921;
+      outline-offset: -3px;
+    }
+
+    .tab-panel[hidden] {
+      display: none;
+    }
+
+    .page-form {
       display: grid;
       grid-template-columns:
         minmax(140px, 0.6fr)
@@ -118,6 +156,34 @@
         auto;
       gap: 12px;
       align-items: end;
+    }
+
+    .entry-fields {
+      display: grid;
+      grid-template-columns:
+        minmax(220px, 1.2fr)
+        minmax(120px, 0.55fr)
+        minmax(120px, 0.55fr)
+        auto;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .entry-options {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-top: 14px;
+    }
+
+    .spoiler-fields {
+      display: contents;
+    }
+
+    .spoiler-fields.is-disabled label,
+    .include-cf-field.is-disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
     }
 
     label {
@@ -133,14 +199,14 @@
       display: contents;
     }
 
-    input,
+    input:not([type="checkbox"]),
     select,
-    button {
+    .search-button {
       height: 52px;
       border-radius: 2px;
     }
 
-    input,
+    input:not([type="checkbox"]),
     select {
       width: 100%;
       padding: 0 15px;
@@ -151,13 +217,20 @@
       font-size: 1.05rem;
     }
 
-    input:focus,
+    input:not([type="checkbox"]):focus,
     select:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px #7c302921;
     }
 
-    button {
+    input:disabled,
+    select:disabled {
+      background: #eee9df;
+      color: var(--muted);
+      cursor: not-allowed;
+    }
+
+    .search-button {
       padding: 0 28px;
       border: 1px solid var(--accent);
       background: var(--accent);
@@ -168,13 +241,34 @@
       text-transform: uppercase;
     }
 
-    button:hover:not(:disabled) {
+    .search-button:hover:not(:disabled) {
       background: var(--accent-dark);
     }
 
-    button:disabled {
+    .search-button:disabled {
       cursor: wait;
       opacity: 0.55;
+    }
+
+    .checkbox-field {
+      display: flex;
+      grid-template-columns: none;
+      align-items: center;
+      gap: 9px;
+      width: fit-content;
+      min-height: 28px;
+      color: var(--ink);
+      cursor: pointer;
+      font-size: 0.82rem;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .checkbox-field input {
+      width: 17px;
+      height: 17px;
+      margin: 0;
+      accent-color: var(--accent);
     }
 
     .form-footer {
@@ -217,7 +311,7 @@
       display: none;
     }
 
-    .results-kicker {
+    #results-kicker {
       margin: 0 0 5px;
       color: var(--accent);
       font: 750 0.7rem/1 system-ui, sans-serif;
@@ -374,8 +468,37 @@
         padding-top: 34px;
       }
 
-      form {
+      .search-tabs {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .search-tab {
+        width: 100%;
+        height: auto;
+        min-height: 52px;
+        padding: 7px 8px;
+        line-height: 1.25;
+      }
+
+      .page-form {
         grid-template-columns: 1fr;
+      }
+
+      .entry-fields {
+        grid-template-columns: 1fr;
+      }
+
+      .spoiler-fields {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .entry-options {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
       }
 
       .page-fields {
@@ -384,7 +507,7 @@
         gap: 12px;
       }
 
-      button {
+      .search-button {
         width: 100%;
       }
 
@@ -418,8 +541,8 @@
     <p class="eyebrow">Based on Modern Library 6-Volume <i>In Search of Lost Time</i></p>
 
     <p class="subtitle">
-      Choose a volume and page—or a page range—to find every guide
-      entry that accompanies your reading.
+      Find a guide entry by name, or choose a volume and page range
+      to look up references alongside your reading.
     </p>
 
     <div class="ornament" aria-hidden="true">✦</div>
@@ -427,58 +550,176 @@
 
   <main class="shell">
     <section class="search-panel" aria-label="Search the guide">
-      <form id="search-form" novalidate>
-        <label>
-          Volume
-
-          <select id="volume" required>
-            <option value="I">I</option>
-            <option value="II">II</option>
-            <option value="III">III</option>
-            <option value="IV">IV</option>
-            <option value="V">V</option>
-            <option value="VI">VI</option>
-          </select>
-        </label>
-
-        <div class="page-fields">
-          <label>
-            Starting page
-
-            <input
-              id="page-start"
-              type="number"
-              inputmode="numeric"
-              autocomplete="off"
-              min="1"
-              step="1"
-              placeholder="23"
-              required
-            >
-          </label>
-
-          <label>
-            Ending page
-
-            <input
-              id="page-end"
-              type="number"
-              inputmode="numeric"
-              autocomplete="off"
-              min="1"
-              step="1"
-              placeholder="25"
-            >
-          </label>
-        </div>
-
-        <button id="search-button" type="submit" disabled>
-          Search guide
+      <div class="search-tabs" role="tablist" aria-label="Lookup method">
+        <button
+          id="entry-tab"
+          class="search-tab"
+          type="button"
+          role="tab"
+          aria-selected="true"
+          aria-controls="entry-panel"
+          data-mode="entry"
+        >
+          Look up by entry name
         </button>
-      </form>
+
+        <button
+          id="page-tab"
+          class="search-tab"
+          type="button"
+          role="tab"
+          aria-selected="false"
+          aria-controls="page-panel"
+          data-mode="page"
+          tabindex="-1"
+        >
+          Look up by page
+        </button>
+      </div>
+
+      <div
+        id="entry-panel"
+        class="tab-panel"
+        role="tabpanel"
+        aria-labelledby="entry-tab"
+      >
+        <form id="entry-form" novalidate>
+          <div class="entry-fields">
+            <label>
+              Entry name
+
+              <input
+                id="entry-name"
+                type="search"
+                autocomplete="off"
+                placeholder="Swann"
+                required
+              >
+            </label>
+
+            <div id="spoiler-fields" class="spoiler-fields">
+              <label>
+                Current volume
+
+                <select id="through-volume">
+                  <option value="I">I</option>
+                  <option value="II">II</option>
+                  <option value="III">III</option>
+                  <option value="IV">IV</option>
+                  <option value="V">V</option>
+                  <option value="VI">VI</option>
+                </select>
+              </label>
+
+              <label>
+                Current page
+
+                <input
+                  id="through-page"
+                  type="number"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  min="1"
+                  step="1"
+                  placeholder="64"
+                >
+              </label>
+            </div>
+
+            <button
+              id="entry-search-button"
+              class="search-button"
+              type="submit"
+              disabled
+            >
+              Search guide
+            </button>
+          </div>
+
+          <div class="entry-options">
+            <label class="checkbox-field">
+              <input
+                id="limit-spoilers"
+                type="checkbox"
+                aria-controls="spoiler-fields"
+                checked
+              >
+              <span>Limit spoilers</span>
+            </label>
+
+            <label class="checkbox-field include-cf-field">
+              <input id="include-later-cf" type="checkbox" checked>
+              <span>Include later cf. references</span>
+            </label>
+          </div>
+        </form>
+      </div>
+
+      <div
+        id="page-panel"
+        class="tab-panel"
+        role="tabpanel"
+        aria-labelledby="page-tab"
+        hidden
+      >
+        <form id="page-form" class="page-form" novalidate>
+          <label>
+            Volume
+
+            <select id="volume" required>
+              <option value="I">I</option>
+              <option value="II">II</option>
+              <option value="III">III</option>
+              <option value="IV">IV</option>
+              <option value="V">V</option>
+              <option value="VI">VI</option>
+            </select>
+          </label>
+
+          <div class="page-fields">
+            <label>
+              Starting page
+
+              <input
+                id="page-start"
+                type="number"
+                inputmode="numeric"
+                autocomplete="off"
+                min="1"
+                step="1"
+                placeholder="23"
+                required
+              >
+            </label>
+
+            <label>
+              Ending page
+
+              <input
+                id="page-end"
+                type="number"
+                inputmode="numeric"
+                autocomplete="off"
+                min="1"
+                step="1"
+                placeholder="25"
+              >
+            </label>
+          </div>
+
+          <button
+            id="page-search-button"
+            class="search-button"
+            type="submit"
+            disabled
+          >
+            Search guide
+          </button>
+        </form>
+      </div>
 
       <div class="form-footer">
-        <p>Leave ending page blank to search one page.</p>
+        <p id="form-help">Search entry names without matching case or accents.</p>
 
         <p
           id="status"
@@ -494,7 +735,7 @@
     <section class="results-region" aria-live="polite">
       <div id="results-summary" class="results-summary" hidden>
         <div>
-          <p class="results-kicker">Guide references</p>
+          <p id="results-kicker">Guide references</p>
           <h2 id="results-title"></h2>
         </div>
 
@@ -525,15 +766,31 @@
       "https://cdn.jsdelivr.net/npm/dompurify@3.4.12/+esm";
 
     const PARQUET_FILE = "a_guide_to_proust.parquet";
-    const VALID_VOLUMES = new Set(["I", "II", "III", "IV", "V", "VI"]);
+    const VOLUMES = ["I", "II", "III", "IV", "V", "VI"];
+    const VALID_VOLUMES = new Set(VOLUMES);
 
-    const form = document.querySelector("#search-form");
+    const tabs = [...document.querySelectorAll(".search-tab")];
+    const entryTab = document.querySelector("#entry-tab");
+    const pageTab = document.querySelector("#page-tab");
+    const entryPanel = document.querySelector("#entry-panel");
+    const pagePanel = document.querySelector("#page-panel");
+    const entryForm = document.querySelector("#entry-form");
+    const entryNameInput = document.querySelector("#entry-name");
+    const limitSpoilersInput = document.querySelector("#limit-spoilers");
+    const spoilerFields = document.querySelector("#spoiler-fields");
+    const throughVolumeInput = document.querySelector("#through-volume");
+    const throughPageInput = document.querySelector("#through-page");
+    const includeLaterCfInput = document.querySelector("#include-later-cf");
+    const entrySearchButton = document.querySelector("#entry-search-button");
+    const pageForm = document.querySelector("#page-form");
     const volumeInput = document.querySelector("#volume");
     const pageStartInput = document.querySelector("#page-start");
     const pageEndInput = document.querySelector("#page-end");
-    const searchButton = document.querySelector("#search-button");
+    const pageSearchButton = document.querySelector("#page-search-button");
+    const formHelp = document.querySelector("#form-help");
     const status = document.querySelector("#status");
     const resultsSummary = document.querySelector("#results-summary");
+    const resultsKicker = document.querySelector("#results-kicker");
     const resultsTitle = document.querySelector("#results-title");
     const resultsCount = document.querySelector("#results-count");
     const results = document.querySelector("#results");
@@ -546,6 +803,50 @@
     function setStatus(message, state) {
       status.textContent = message;
       status.dataset.state = state;
+    }
+
+    function setSearchButtonsDisabled(disabled) {
+      entrySearchButton.disabled = disabled || !connection;
+      pageSearchButton.disabled = disabled || !connection;
+    }
+
+    function setActiveMode(mode, { updateUrl = false, focus = false } = {}) {
+      const isEntryMode = mode === "entry";
+
+      entryTab.setAttribute("aria-selected", String(isEntryMode));
+      entryTab.tabIndex = isEntryMode ? 0 : -1;
+      pageTab.setAttribute("aria-selected", String(!isEntryMode));
+      pageTab.tabIndex = isEntryMode ? -1 : 0;
+      entryPanel.hidden = !isEntryMode;
+      pagePanel.hidden = isEntryMode;
+      formHelp.textContent = isEntryMode
+        ? "Search entry names without matching case or accents."
+        : "Leave ending page blank to search one page.";
+
+      if (updateUrl) {
+        const url = new URL(window.location.href);
+        url.searchParams.set("mode", mode);
+        window.history.replaceState({}, "", url);
+      }
+
+      if (focus) {
+        (isEntryMode ? entryNameInput : pageStartInput).focus();
+      }
+    }
+
+    function syncSpoilerFields() {
+      const enabled = limitSpoilersInput.checked;
+
+      spoilerFields.classList.toggle("is-disabled", !enabled);
+      includeLaterCfInput.closest("label").classList.toggle(
+        "is-disabled",
+        !enabled
+      );
+      throughVolumeInput.disabled = !enabled;
+      throughPageInput.disabled = !enabled;
+      includeLaterCfInput.disabled = !enabled;
+      throughVolumeInput.required = enabled;
+      throughPageInput.required = enabled;
     }
 
     function parseIntegerPage(value, emptyMessage) {
@@ -622,6 +923,38 @@
       return { start, end };
     }
 
+    function parseEntrySearch() {
+      const name = entryNameInput.value.trim();
+
+      if (!name) {
+        throw new Error("Enter an entry name.");
+      }
+
+      if (!limitSpoilersInput.checked) {
+        return { name, spoiler: null };
+      }
+
+      const volume = throughVolumeInput.value;
+
+      if (!VALID_VOLUMES.has(volume)) {
+        throw new Error("Choose a current volume from I through VI.");
+      }
+
+      const page = parseIntegerPage(
+        throughPageInput.value,
+        "Enter your current page."
+      );
+
+      return {
+        name,
+        spoiler: {
+          volume,
+          page,
+          includeLaterCf: includeLaterCfInput.checked
+        }
+      };
+    }
+
     function focusPageInput(error) {
       const message =
         error instanceof Error
@@ -635,6 +968,21 @@
         pageEndInput.focus();
       } else {
         pageStartInput.focus();
+      }
+    }
+
+    function focusEntryInput(error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : String(error);
+
+      if (message.includes("volume")) {
+        throughVolumeInput.focus();
+      } else if (message.includes("page")) {
+        throughPageInput.focus();
+      } else {
+        entryNameInput.focus();
       }
     }
 
@@ -703,7 +1051,7 @@
       return [...sections.values()];
     }
 
-    function renderRows(rows, volume, range) {
+    function renderRows(rows, { kicker, title, emptyTitle, emptyText }) {
       results.replaceChildren();
 
       const sections = groupRows(rows);
@@ -712,18 +1060,8 @@
         0
       );
 
-      const pageLabel =
-        range.start === range.end
-          ? String(range.start)
-          : `${range.start}–${range.end}`;
-
-      const pageWord =
-        range.start === range.end
-          ? "page"
-          : "pages";
-
-      resultsTitle.textContent =
-        `Volume ${volume}, ${pageWord} ${pageLabel}`;
+      resultsKicker.textContent = kicker;
+      resultsTitle.textContent = title;
 
       resultsCount.textContent =
         `${rows.length} ${rows.length === 1 ? "reference" : "references"} · ` +
@@ -733,10 +1071,7 @@
       resultsSummary.hidden = false;
 
       if (rows.length === 0) {
-        showMessage(
-          "No references found",
-          "Try a nearby page or check that the selected volume matches your edition."
-        );
+        showMessage(emptyTitle, emptyText);
 
         return;
       }
@@ -791,7 +1126,41 @@
       results.append(fragment);
     }
 
-    async function searchGuide(volume, range) {
+    function renderPageRows(rows, volume, range) {
+      const pageLabel =
+        range.start === range.end
+          ? String(range.start)
+          : `${range.start}–${range.end}`;
+
+      const pageWord = range.start === range.end ? "page" : "pages";
+
+      renderRows(rows, {
+        kicker: "Guide references",
+        title: `Volume ${volume}, ${pageWord} ${pageLabel}`,
+        emptyTitle: "No references found",
+        emptyText:
+          "Try a nearby page or check that the selected volume matches your edition."
+      });
+    }
+
+    function renderEntryRows(rows, name, spoiler) {
+      const cutoff = spoiler
+        ? ` through Volume ${spoiler.volume}, page ${spoiler.page}`
+        : "";
+
+      renderRows(rows, {
+        kicker: "Entry lookup",
+        title: `Entries matching “${name}”${cutoff}`,
+        emptyTitle: spoiler
+          ? "No spoiler-safe references found"
+          : "No matching references found",
+        emptyText: spoiler
+          ? "No matching references occur within your current reading position."
+          : "Try a shorter name or check the spelling."
+      });
+    }
+
+    async function searchByPage(volume, range) {
       /*
        * The values interpolated below are safe:
        * volume is restricted to VALID_VOLUMES, and
@@ -828,9 +1197,101 @@
       );
     }
 
-    function updateUrl(volume, range) {
+    function volumeRankSql() {
+      return `CASE p.volume
+        WHEN '**I**' THEN 1
+        WHEN '**II**' THEN 2
+        WHEN '**III**' THEN 3
+        WHEN '**IV**' THEN 4
+        WHEN '**V**' THEN 5
+        WHEN '**VI**' THEN 6
+        ELSE 999
+      END`;
+    }
+
+    function cutoffSql(spoiler) {
+      const selectedRank = VOLUMES.indexOf(spoiler.volume) + 1;
+      const rank = volumeRankSql();
+
+      return `COALESCE(
+        ${rank} < ${selectedRank}
+        OR (
+          ${rank} = ${selectedRank}
+          AND p.page_start <= ${spoiler.page}
+        ),
+        false
+      )`;
+    }
+
+    async function searchByEntry(name, spoiler) {
+      let spoilerClause = "";
+
+      if (spoiler) {
+        const isWithinCutoff = cutoffSql(spoiler);
+
+        spoilerClause = spoiler.includeLaterCf
+          ? `
+            AND list_count(pages) > 0
+            AND list_bool_or(
+              list_transform(
+                pages,
+                lambda p: NOT COALESCE(p.is_parenthesized, false)
+              )
+            )
+            AND list_bool_and(
+              list_transform(
+                pages,
+                lambda p:
+                  COALESCE(p.is_parenthesized, false)
+                  OR ${isWithinCutoff}
+              )
+            )
+          `
+          : `
+            AND list_count(pages) > 0
+            AND list_bool_and(
+              list_transform(
+                pages,
+                lambda p: ${isWithinCutoff}
+              )
+            )
+          `;
+      }
+
+      const sql = `
+        SELECT
+          section,
+          row_number,
+          entry,
+          reference,
+          reference_index
+        FROM guide
+        WHERE reference <> entry
+          AND strip_accents(lower(entry)) LIKE
+            '%' || strip_accents(lower(?)) || '%'
+          ${spoilerClause}
+        ORDER BY row_number, reference_index
+      `;
+
+      const statement = await connection.prepare(sql);
+
+      try {
+        const table = await statement.query(name);
+
+        return table.toArray().map((row) =>
+          typeof row.toJSON === "function"
+            ? row.toJSON()
+            : row
+        );
+      } finally {
+        await statement.close();
+      }
+    }
+
+    function updatePageUrl(volume, range) {
       const url = new URL(window.location.href);
 
+      url.searchParams.set("mode", "page");
       url.searchParams.set("volume", volume);
       url.searchParams.set(
         "pages",
@@ -842,7 +1303,29 @@
       window.history.replaceState({}, "", url);
     }
 
-    form.addEventListener("submit", async (event) => {
+    function updateEntryUrl(name, spoiler) {
+      const url = new URL(window.location.href);
+
+      url.searchParams.set("mode", "entry");
+      url.searchParams.set("entry", name);
+
+      if (spoiler) {
+        url.searchParams.set("through_volume", spoiler.volume);
+        url.searchParams.set("through_page", String(spoiler.page));
+        url.searchParams.set(
+          "include_later_cf",
+          spoiler.includeLaterCf ? "1" : "0"
+        );
+      } else {
+        url.searchParams.delete("through_volume");
+        url.searchParams.delete("through_page");
+        url.searchParams.delete("include_later_cf");
+      }
+
+      window.history.replaceState({}, "", url);
+    }
+
+    pageForm.addEventListener("submit", async (event) => {
       event.preventDefault();
 
       try {
@@ -854,13 +1337,13 @@
 
         const range = parsePageRange();
 
-        searchButton.disabled = true;
+        setSearchButtonsDisabled(true);
         setStatus("Searching…", "loading");
 
-        const rows = await searchGuide(volume, range);
+        const rows = await searchByPage(volume, range);
 
-        renderRows(rows, volume, range);
-        updateUrl(volume, range);
+        renderPageRows(rows, volume, range);
+        updatePageUrl(volume, range);
         setStatus("Index ready", "ready");
       } catch (error) {
         const message =
@@ -873,9 +1356,62 @@
         setStatus("Search error", "error");
         focusPageInput(error);
       } finally {
-        searchButton.disabled = !connection;
+        setSearchButtonsDisabled(false);
       }
     });
+
+    entryForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      try {
+        const { name, spoiler } = parseEntrySearch();
+
+        setSearchButtonsDisabled(true);
+        setStatus("Searching…", "loading");
+
+        const rows = await searchByEntry(name, spoiler);
+
+        renderEntryRows(rows, name, spoiler);
+        updateEntryUrl(name, spoiler);
+        setStatus("Index ready", "ready");
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : String(error);
+
+        resultsSummary.hidden = true;
+        showMessage("The guide could not be searched", message);
+        setStatus("Search error", "error");
+        focusEntryInput(error);
+      } finally {
+        setSearchButtonsDisabled(false);
+      }
+    });
+
+    limitSpoilersInput.addEventListener("change", syncSpoilerFields);
+
+    for (const tab of tabs) {
+      tab.addEventListener("click", () => {
+        setActiveMode(tab.dataset.mode, { updateUrl: true, focus: true });
+      });
+
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
+          return;
+        }
+
+        event.preventDefault();
+
+        const mode =
+          event.key === "ArrowLeft" || event.key === "Home"
+            ? "entry"
+            : "page";
+
+        setActiveMode(mode, { updateUrl: true });
+        (mode === "entry" ? entryTab : pageTab).focus();
+      });
+    }
 
     async function initialize() {
       try {
@@ -947,12 +1483,18 @@
           FROM read_parquet('${PARQUET_FILE}')
         `);
 
-        searchButton.disabled = false;
+        setSearchButtonsDisabled(false);
         setStatus("Index ready", "ready");
 
         const params = new URLSearchParams(window.location.search);
+        const requestedMode = params.get("mode");
+        const initialEntry = params.get("entry");
         const initialVolume = params.get("volume");
         const initialPages = params.get("pages");
+        const throughVolume = params.get("through_volume");
+        const throughPage = params.get("through_page");
+        const includeLaterCf = params.get("include_later_cf");
+        let initialPageError = null;
 
         if (initialVolume && VALID_VOLUMES.has(initialVolume)) {
           volumeInput.value = initialVolume;
@@ -967,19 +1509,57 @@
               range.start === range.end
                 ? ""
                 : String(range.end);
-
-            form.requestSubmit();
           } catch (error) {
-            const message =
-              error instanceof Error
-                ? error.message
-                : String(error);
-
-            resultsSummary.hidden = true;
-            showMessage("The guide could not be searched", message);
-            setStatus("Search error", "error");
-            pageStartInput.focus();
+            initialPageError = error;
           }
+        }
+
+        if (initialEntry !== null) {
+          entryNameInput.value = initialEntry;
+        }
+
+        limitSpoilersInput.checked =
+          Boolean(throughVolume || throughPage) || initialEntry === null;
+
+        if (throughVolume && VALID_VOLUMES.has(throughVolume)) {
+          throughVolumeInput.value = throughVolume;
+        }
+
+        if (throughPage) {
+          throughPageInput.value = throughPage;
+        }
+
+        includeLaterCfInput.checked =
+          includeLaterCf !== "0" && includeLaterCf !== "false";
+        syncSpoilerFields();
+
+        const initialMode =
+          requestedMode === "entry" || requestedMode === "page"
+            ? requestedMode
+            : initialEntry
+              ? "entry"
+              : initialPages
+                ? "page"
+                : "entry";
+
+        setActiveMode(initialMode);
+
+        if (initialMode === "entry" && initialEntry !== null) {
+          entryForm.requestSubmit();
+        } else if (initialMode === "page" && initialPages && !initialPageError) {
+          pageForm.requestSubmit();
+        } else if (initialMode === "page" && initialPageError) {
+          const message =
+            initialPageError instanceof Error
+              ? initialPageError.message
+              : String(initialPageError);
+
+          resultsSummary.hidden = true;
+          showMessage("The guide could not be searched", message);
+          setStatus("Search error", "error");
+          pageStartInput.focus();
+        } else if (initialMode === "entry") {
+          entryNameInput.focus();
         } else {
           pageStartInput.focus();
         }
@@ -992,7 +1572,7 @@
         resultsSummary.hidden = true;
         showMessage("The index could not be loaded", message);
         setStatus("Index unavailable", "error");
-        searchButton.disabled = true;
+        setSearchButtonsDisabled(true);
       }
     }
 

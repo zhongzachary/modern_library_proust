@@ -113,7 +113,8 @@
       display: grid;
       grid-template-columns:
         minmax(140px, 0.6fr)
-        minmax(220px, 1.4fr)
+        minmax(120px, 0.7fr)
+        minmax(120px, 0.7fr)
         auto;
       gap: 12px;
       align-items: end;
@@ -126,6 +127,10 @@
       font: 700 0.75rem/1.2 system-ui, sans-serif;
       letter-spacing: 0.09em;
       text-transform: uppercase;
+    }
+
+    .page-fields {
+      display: contents;
     }
 
     input,
@@ -373,6 +378,12 @@
         grid-template-columns: 1fr;
       }
 
+      .page-fields {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
       button {
         width: 100%;
       }
@@ -416,7 +427,7 @@
 
   <main class="shell">
     <section class="search-panel" aria-label="Search the guide">
-      <form id="search-form">
+      <form id="search-form" novalidate>
         <label>
           Volume
 
@@ -430,18 +441,36 @@
           </select>
         </label>
 
-        <label>
-          Page or page range
+        <div class="page-fields">
+          <label>
+            Starting page
 
-          <input
-            id="pages"
-            type="text"
-            inputmode="numeric"
-            autocomplete="off"
-            placeholder="e.g. 23 or 23–25"
-            required
-          >
-        </label>
+            <input
+              id="page-start"
+              type="number"
+              inputmode="numeric"
+              autocomplete="off"
+              min="1"
+              step="1"
+              placeholder="23"
+              required
+            >
+          </label>
+
+          <label>
+            Ending page
+
+            <input
+              id="page-end"
+              type="number"
+              inputmode="numeric"
+              autocomplete="off"
+              min="1"
+              step="1"
+              placeholder="25"
+            >
+          </label>
+        </div>
 
         <button id="search-button" type="submit" disabled>
           Search guide
@@ -449,7 +478,7 @@
       </form>
 
       <div class="form-footer">
-        <p>Use a hyphen, en dash, or double hyphen for a range.</p>
+        <p>Leave ending page blank to search one page.</p>
 
         <p
           id="status"
@@ -500,7 +529,8 @@
 
     const form = document.querySelector("#search-form");
     const volumeInput = document.querySelector("#volume");
-    const pagesInput = document.querySelector("#pages");
+    const pageStartInput = document.querySelector("#page-start");
+    const pageEndInput = document.querySelector("#page-end");
     const searchButton = document.querySelector("#search-button");
     const status = document.querySelector("#status");
     const resultsSummary = document.querySelector("#results-summary");
@@ -518,7 +548,27 @@
       status.dataset.state = state;
     }
 
-    function parsePageRange(value) {
+    function parseIntegerPage(value, emptyMessage) {
+      const normalized = value.trim();
+
+      if (!normalized) {
+        throw new Error(emptyMessage);
+      }
+
+      if (!/^\d+$/.test(normalized)) {
+        throw new Error("Page numbers must be positive whole numbers.");
+      }
+
+      const page = Number(normalized);
+
+      if (!Number.isSafeInteger(page) || page < 1) {
+        throw new Error("Page numbers must be positive whole numbers.");
+      }
+
+      return page;
+    }
+
+    function parseLegacyPageRange(value) {
       const match = value.match(
         /^\s*(\d+)\s*(?:(?:-{1,2}|–|—)\s*(\d+))?\s*$/
       );
@@ -548,6 +598,44 @@
       }
 
       return { start, end };
+    }
+
+    function parsePageRange() {
+      const start = parseIntegerPage(
+        pageStartInput.value,
+        "Enter a starting page."
+      );
+
+      const end = pageEndInput.value.trim()
+        ? parseIntegerPage(
+            pageEndInput.value,
+            "Enter an ending page or leave it blank."
+          )
+        : start;
+
+      if (start > end) {
+        throw new Error(
+          "The first page must come before the second page."
+        );
+      }
+
+      return { start, end };
+    }
+
+    function focusPageInput(error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : String(error);
+
+      if (
+        message.includes("ending") ||
+        message.includes("second page")
+      ) {
+        pageEndInput.focus();
+      } else {
+        pageStartInput.focus();
+      }
     }
 
     function addText(parent, tag, className, text) {
@@ -764,7 +852,7 @@
           throw new Error("Choose a volume from I through VI.");
         }
 
-        const range = parsePageRange(pagesInput.value);
+        const range = parsePageRange();
 
         searchButton.disabled = true;
         setStatus("Searching…", "loading");
@@ -783,7 +871,7 @@
         resultsSummary.hidden = true;
         showMessage("The guide could not be searched", message);
         setStatus("Search error", "error");
-        pagesInput.focus();
+        focusPageInput(error);
       } finally {
         searchButton.disabled = !connection;
       }
@@ -871,10 +959,29 @@
         }
 
         if (initialPages) {
-          pagesInput.value = initialPages;
-          form.requestSubmit();
+          try {
+            const range = parseLegacyPageRange(initialPages);
+
+            pageStartInput.value = String(range.start);
+            pageEndInput.value =
+              range.start === range.end
+                ? ""
+                : String(range.end);
+
+            form.requestSubmit();
+          } catch (error) {
+            const message =
+              error instanceof Error
+                ? error.message
+                : String(error);
+
+            resultsSummary.hidden = true;
+            showMessage("The guide could not be searched", message);
+            setStatus("Search error", "error");
+            pageStartInput.focus();
+          }
         } else {
-          pagesInput.focus();
+          pageStartInput.focus();
         }
       } catch (error) {
         const message =

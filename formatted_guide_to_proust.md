@@ -1302,7 +1302,7 @@
   - His "complicated and rapid capers" condemned as ridiculous by Charlus: **III** 611.
   - His illness: **IV** 2.
 
-- FISHER-GIRL approached by M at Carqueville: **II** 402--1-.
+- FISHER-GIRL approached by M at Carqueville: **II** 402--4.
 
 - FLORA.
   - _See_ Céline and Flora.
@@ -1801,8 +1801,8 @@
   - Oriane epitomises the decline of the Guermantes: 463--64, 499--500.
   - Time and the Guermantes "way": 502--7.
 
-- GUERMANTES, Basin, Duc de.
-  - (Prince des Laumes before inheriting the dukedom on the death of his father.) M's grandmother finds him "common": **I** 25.
+- GUERMANTES, Basin, Duc de (Prince des Laumes before inheriting the dukedom on the death of his father).
+  - M's grandmother finds him "common": **I** 25.
   - Consistently unfaithful to his wife: 481.
   - Suspected by Swann of writing an anonymous letter: 506--10.
   - Brother of M. de Charlus: **II** 449.
@@ -2600,8 +2600,7 @@
   - At Mme de Saint-Euverte's; his monocle: 465--66.
   - At the Opéra his fish-like appearance: **III** 48--49, 62.
 
-- PARK-KEEPER in the Champs-Elysées: **II** 88; conversation with the "Marquise" (q.
-  - v.): **III** 419--23.
+- PARK-KEEPER in the Champs-Elysées: **II** 88; conversation with the "Marquise" (q.v.): **III** 419--23.
 
 - PARME, Princesse de.
   - Gives the most splendid parties in Paris: **I** 382.
@@ -4734,8 +4733,8 @@
   - Morel sings his Viens _Poupoule:_ **IV** 632.
   - Discussed by Charlus and the bus conductor: 735.
 
-- MEILHAC, Henri, French playwright and librettist (1831--97), collaborator of Ludovic Halévy (q.
-  - v.). Admired by Mme de Guermantes: **I** 475 (cf. **III** 278, 678--79; **VI** 472).
+- MEILHAC, Henri, French playwright and librettist (1831--97), collaborator of Ludovic Halévy (q.v.).
+  - Admired by Mme de Guermantes: **I** 475 (cf. **III** 278, 678--79; **VI** 472).
   - Imagined dialogue between the Princesse de Guermantes and her guests in her box at the Opéra suggests a scene from _Le Mari de la Débutante:_ **III** 48.
   - His Cleopatra: **IV** 387.
   - Mallarmé mocked by him: **V** 35.
@@ -7342,8 +7341,7 @@
   - Homosexuals make good husbands: **V** 929--30; **VI** 20 (cf. **V** 409--10).
   - "The phenomenon, so ill-understood and so needlessly condemned, of sexual inversion": 321.
   - Inverts as readers: 321--22.
-
-- _(For references to homosexuality, male and female, related to specific individuals, see the_ Index of Characters _under_ Albertine; Andrée; Argencourt; Bernard, Nissim; Bloch's sister(s) and cousin(s); Cambremer, Leonor; Charlus; Châtellerault; Foix; Gilberte; Guermantes, Prince de; Jupien; Léa; Legrandin; Lévy\*, Esther; Morel; Odette; Saint-Loup; Théodore; Vaugoubert; Vinteuil, Mlle).
+  - _(For references to homosexuality, male and female, related to specific individuals, see the_ Index of Characters _under_ Albertine; Andrée; Argencourt; Bernard, Nissim; Bloch's sister(s) and cousin(s); Cambremer, Leonor; Charlus; Châtellerault; Foix; Gilberte; Guermantes, Prince de; Jupien; Léa; Legrandin; Lévy\*, Esther; Morel; Odette; Saint-Loup; Théodore; Vaugoubert; Vinteuil, Mlle).
 
 - JEALOUSY.
   - Swann's jealousy: **I** 385--457 _passim_, 505--43 _passim_. Inquiries of the jealous lover compared to the researches of the scholar: 388--90, 445.
@@ -7406,8 +7404,7 @@
   - Morel's anti-semitism, the effect of a loan from Nissim Bernard through Bloch: 62--63 (cf. **IV** 691).
   - Anti-semitism in society; Gilberte changes her name from Swann to Forcheville: 775--77 (cf. 790--92).
   - Strong family feeling among Jews; Bloch's devotion to his father's memory: **VI** 353.
-
-- _(See_ Dreyfus Case.)
+  - _(See_ Dreyfus Case.)
 
 - LANGUAGE.
   - Hereditary transmission of speech characteristics: **II** 667--68.
@@ -7420,46 +7417,27 @@
 
 - _Language of individual characters_.
   - Albertine's slangy speech: **II** 509, 631--34; her voice and vocabulary: 666--68; significant changes in her vocabulary: **III** 482--88; **V** 13.
-
-- Voices and speech mannerisms of the "little band": **II** 666--68.
-
-- Bergotte's mannerisms of speech and vocabulary: **II** 168--79.
-
-- Bloch's affected style of speech and mock-Homeric jargon: **I** 124--25; **II** 443--44, 477--78, 489; **III** 328; **IV** 319, 682.
-
-- Bréauté's voice and pronunciation: **V** 44--47.
-
-- Brichot's pedantic language: **I** 357--60; **IV** 371--72, 380--81, 481--83, 611--14.
-
-- Mme de Cambremer-Legrandin's pretentious vocabulary and pronunciation: **III** 271; **IV** 294--97, 437--45, 512--13.
-
-- Colourful language of Céleste Albaret and her sister: **IV** 331--35; Celeste's strange linguistic genius: **V** 12--13, 167.
-
-- Cottard's puns: **I** 283 et sqq.
-
-- Mme Cottard's stately language: **II** 234--35, 242--51.
-
-- Franchise's malapropisms: **I** 217; her colourful idiom: 233; her language, "like the French language," thickly strewn with errors: **III** 20--21; speaks the language of Mme de Sévigné: 21; of La Bruyère: 25; of Saint-Simon: 84; her speech traditional and local, "governed by extremely ancient laws": 77 (cf. **IV** 171--72); her vocabulary contaminated by her daughter's slang: **V** 199--200; **VI** 86 (cf. **III** 194, 464; **IV** 172--73).
-
-- Verbal mannerisms of the Guermantes set: **I** 475, 479--87; **II** 113--14, 129.
-  - The Duke's odd vocabulary: **III** 305, 317--22, 570; his bad French: **IV** 162, 479 (cf. **V** 43).
-  - Old-fashioned purity of the Duchess's language; her richly flavoured vocabulary; voice and accent that betray "a rudeness of the soil": **III** 677--78, 688--89, 781, **V** 34--39.
-
-- Jupien's cultured speech: **III** 17--18, 418.
-
-- Legrandin's flowery speech: **I** 92--93, 177--86.
-
-- The idiom of Norpois: **II** 9, 29--71 _passim; III_ 302--55 _passim;_ **V** 855--66.
-
-- Rachel's language, "the jargon of the coteries and studios": **III** 220--21.
-
-- Saint-Loup's mannerisms of speech; cultivates up-to-date expressions: **II** 451, 468--69; **III** 87--88, 698; **IV** 207.
-
-- Saniette's pedantic phraseology: **V** 298--99, 301--3.
-
-- Swann's verbal mannerisms: **I** 134--36, 483--84; **II** 104, 113--14.
-
-- Mme de Villeparisis affects "the almost rustic speech of the old nobility": **III** 265.
+  - Voices and speech mannerisms of the "little band": **II** 666--68.
+  - Bergotte's mannerisms of speech and vocabulary: **II** 168--79.
+  - Bloch's affected style of speech and mock-Homeric jargon: **I** 124--25; **II** 443--44, 477--78, 489; **III** 328; **IV** 319, 682.
+  - Bréauté's voice and pronunciation: **V** 44--47.
+  - Brichot's pedantic language: **I** 357--60; **IV** 371--72, 380--81, 481--83, 611--14.
+  - Mme de Cambremer-Legrandin's pretentious vocabulary and pronunciation: **III** 271; **IV** 294--97, 437--45, 512--13.
+  - Colourful language of Céleste Albaret and her sister: **IV** 331--35; Celeste's strange linguistic genius: **V** 12--13, 167.
+  - Cottard's puns: **I** 283 et sqq.
+  - Mme Cottard's stately language: **II** 234--35, 242--51.
+  - Franchise's malapropisms: **I** 217; her colourful idiom: 233; her language, "like the French language," thickly strewn with errors: **III** 20--21; speaks the language of Mme de Sévigné: 21; of La Bruyère: 25; of Saint-Simon: 84; her speech traditional and local, "governed by extremely ancient laws": 77 (cf. **IV** 171--72); her vocabulary contaminated by her daughter's slang: **V** 199--200; **VI** 86 (cf. **III** 194, 464; **IV** 172--73).
+  - Verbal mannerisms of the Guermantes set: **I** 475, 479--87; **II** 113--14, 129.
+    - The Duke's odd vocabulary: **III** 305, 317--22, 570; his bad French: **IV** 162, 479 (cf. **V** 43).
+    - Old-fashioned purity of the Duchess's language; her richly flavoured vocabulary; voice and accent that betray "a rudeness of the soil": **III** 677--78, 688--89, 781, **V** 34--39.
+  - Jupien's cultured speech: **III** 17--18, 418.
+  - Legrandin's flowery speech: **I** 92--93, 177--86.
+  - The idiom of Norpois: **II** 9, 29--71 _passim; III_ 302--55 _passim;_ **V** 855--66.
+  - Rachel's language, "the jargon of the coteries and studios": **III** 220--21.
+  - Saint-Loup's mannerisms of speech; cultivates up-to-date expressions: **II** 451, 468--69; **III** 87--88, 698; **IV** 207.
+  - Saniette's pedantic phraseology: **V** 298--99, 301--3.
+  - Swann's verbal mannerisms: **I** 134--36, 483--84; **II** 104, 113--14.
+  - Mme de Villeparisis affects "the almost rustic speech of the old nobility": **III** 265.
 
 - LAUGHTER.
   - Not a well-defined language: **II** 217.
@@ -7467,26 +7445,17 @@
   - Verbal descriptions incomplete without the means to represent a laugh (Charlus): 463--64.
 
 - _Laughter of individual characters_.
-  - Albertine's laughter---"indecent in the way that the cooing of doves or certain animal cries can be": II. 681; M longs to hear it again: **IV** 243, "pungent, sensual and revealing": 263; "deep and penetrating": 264; "provoking": 348; "that laugh in which she gave utterance as it were to the strange sound of her pleasure": 705; "that laugh that I always found so disturbing": **V** 152, 165; "insolent" laughter on the beach at Balbec: 226--27; "blithe and tender" laugh on awakening: 522.
-
-- Bloch's braying laugh which echoes his father's: **II** 476.
-
-- M. de Cambremer's laugh and its possible meanings: **IV** 440--41, 513--14.
-
-- Charlus's laughter, expressing his "lordly insolence and hysterical glee": **IV** 78; his tinkling laugh with its ancestral sonorities: 463--64.
-
-- Mme Cottard's "charming, girlish" laugh: **I** 363.
-
-- Allberte's laugh which seems to be tracing an invisible surface on another plane: **II** 86, 217.
-
-- Insolent and coquettish laugh of the Princesse des Laumes: **I** 473--74, 477.
-
-- Odette's little simpering laugh: **I** 311.
-  - "Merry ángelus" of Ski's laugh: **V** 384--85.
-
-- Mme Verdurin dislocates her jaw from laughing too much: **I** 266--67; symbolical dumb-show as a substitute for laughter: 289--90 (cf. **IV** 482).
-
-- M. Verdurin's dumb-show of "shaking with laughter": **I** 372--73, and his laugh like a smoker's choking fit: **V** 385.
+  - Albertine's laughter---"indecent in the way that the cooing of doves or certain animal cries can be": **II** 681; M longs to hear it again: **IV** 243, "pungent, sensual and revealing": 263; "deep and penetrating": 264; "provoking": 348; "that laugh in which she gave utterance as it were to the strange sound of her pleasure": 705; "that laugh that I always found so disturbing": **V** 152, 165; "insolent" laughter on the beach at Balbec: 226--27; "blithe and tender" laugh on awakening: 522.
+  - Bloch's braying laugh which echoes his father's: **II** 476.
+  - M. de Cambremer's laugh and its possible meanings: **IV** 440--41, 513--14.
+  - Charlus's laughter, expressing his "lordly insolence and hysterical glee": **IV** 78; his tinkling laugh with its ancestral sonorities: 463--64.
+  - Mme Cottard's "charming, girlish" laugh: **I** 363.
+  - Allberte's laugh which seems to be tracing an invisible surface on another plane: **II** 86, 217.
+  - Insolent and coquettish laugh of the Princesse des Laumes: **I** 473--74, 477.
+  - Odette's little simpering laugh: **I** 311.
+    - "Merry ángelus" of Ski's laugh: **V** 384--85.
+  - Mme Verdurin dislocates her jaw from laughing too much: **I** 266--67; symbolical dumb-show as a substitute for laughter: 289--90 (cf. **IV** 482).
+  - M. Verdurin's dumb-show of "shaking with laughter": **I** 372--73, and his laugh like a smoker's choking fit: **V** 385.
 
 - LETTERS.
   - Note from M to his mother at Combray: **I** 37--39.

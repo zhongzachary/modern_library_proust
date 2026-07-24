@@ -1,0 +1,895 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta
+    name="description"
+    content="Search A Guide to Proust by volume and page."
+  >
+
+  <title>A Guide to Proust — Page Index</title>
+
+  <style>
+    :root {
+      --paper: #f4efe5;
+      --card: #fffdf8;
+      --ink: #29241f;
+      --muted: #746b61;
+      --rule: #cabda7;
+      --accent: #7c3029;
+      --accent-dark: #57231f;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      background:
+        radial-gradient(circle at 15% 0%, #fff9, transparent 28rem),
+        var(--paper);
+      color: var(--ink);
+      font-family: Georgia, "Times New Roman", serif;
+      line-height: 1.55;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .shell {
+      width: min(1080px, calc(100% - 32px));
+      margin-inline: auto;
+    }
+
+    /* Header */
+
+    header {
+      padding: 42px 0 26px;
+      text-align: center;
+    }
+
+    .eyebrow {
+      margin: 0 0 12px;
+      color: var(--accent);
+      font: 750 0.72rem/1.2 system-ui, sans-serif;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.5rem, 7vw, 4.7rem);
+      font-weight: 400;
+      letter-spacing: -0.045em;
+      line-height: 0.95;
+    }
+
+    .subtitle {
+      max-width: 620px;
+      margin: 16px auto 0;
+      color: var(--muted);
+      font-size: 1.1rem;
+    }
+
+    .ornament {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: min(280px, 55vw);
+      margin: 18px auto 0;
+      color: var(--accent);
+    }
+
+    .ornament::before,
+    .ornament::after {
+      height: 1px;
+      flex: 1;
+      background: var(--rule);
+      content: "";
+    }
+
+    /* Search */
+
+    .search-panel {
+      padding: 22px;
+      border: 1px solid #7c30292e;
+      border-radius: 4px;
+      background: #fffdf8e8;
+      box-shadow: 0 8px 28px #3b2b1b12;
+    }
+
+    form {
+      display: grid;
+      grid-template-columns:
+        minmax(140px, 0.6fr)
+        minmax(220px, 1.4fr)
+        auto;
+      gap: 12px;
+      align-items: end;
+    }
+
+    label {
+      display: grid;
+      gap: 8px;
+      color: var(--muted);
+      font: 700 0.75rem/1.2 system-ui, sans-serif;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    input,
+    select,
+    button {
+      height: 52px;
+      border-radius: 2px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 0 15px;
+      border: 1px solid var(--rule);
+      outline: none;
+      background: var(--card);
+      color: var(--ink);
+      font-size: 1.05rem;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px #7c302921;
+    }
+
+    button {
+      padding: 0 28px;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: white;
+      cursor: pointer;
+      font: 750 0.8rem/1 system-ui, sans-serif;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    button:hover:not(:disabled) {
+      background: var(--accent-dark);
+    }
+
+    button:disabled {
+      cursor: wait;
+      opacity: 0.55;
+    }
+
+    .form-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      margin-top: 14px;
+      color: var(--muted);
+      font: 0.8rem/1.4 system-ui, sans-serif;
+    }
+
+    .form-footer p {
+      margin: 0;
+    }
+
+    #status {
+      text-align: right;
+    }
+
+    #status[data-state="error"] {
+      color: var(--accent);
+    }
+
+    /* Results */
+
+    .results-region {
+      padding: 38px 0 60px;
+    }
+
+    .results-summary {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .results-summary[hidden] {
+      display: none;
+    }
+
+    .results-kicker {
+      margin: 0 0 5px;
+      color: var(--accent);
+      font: 750 0.7rem/1 system-ui, sans-serif;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+    }
+
+    #results-title {
+      margin: 0;
+      font-size: clamp(1.7rem, 4vw, 2.5rem);
+      font-weight: 400;
+      line-height: 1.1;
+    }
+
+    #results-count {
+      margin: 0;
+      color: var(--muted);
+      font: 0.8rem/1.4 system-ui, sans-serif;
+      white-space: nowrap;
+    }
+
+    #results {
+      display: grid;
+      gap: 30px;
+      padding-top: 24px;
+    }
+
+    /* Sections */
+
+    .section-block {
+      display: block;
+    }
+
+    .section-title {
+      width: 100%;
+      margin: 0 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--rule);
+      color: var(--accent);
+      font: 750 1.08rem/1.45 system-ui, sans-serif;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* Entries */
+
+    .entries {
+      display: grid;
+      gap: 0;
+    }
+
+    .entry-card {
+      padding: 0 0 15px;
+      overflow: hidden;
+    }
+
+    .entry-card + .entry-card {
+      padding-top: 15px;
+      border-top: 1px solid var(--rule);
+    }
+
+    .entry-title {
+      margin: 0 0 5px;
+      padding: 0;
+      font-size: 1rem;
+      line-height: 1.35;
+    }
+
+    /* References */
+
+    .references {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .reference {
+      position: relative;
+      padding: 3px 0 3px 17px;
+      color: #464038;
+      font-size: 0.94rem;
+      line-height: 1.42;
+    }
+
+    .reference::before {
+      position: absolute;
+      top: 13px;
+      left: 1px;
+      width: 7px;
+      height: 1px;
+      background: var(--accent);
+      content: "";
+    }
+
+    /* Markdown */
+
+    .entry-title strong,
+    .reference strong {
+      font-weight: 700;
+    }
+
+    .entry-title em,
+    .reference em {
+      font-style: italic;
+    }
+
+    .entry-title a,
+    .reference a {
+      color: var(--accent);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
+    }
+
+    .entry-title code,
+    .reference code {
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    /* Empty and error messages */
+
+    .message {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 50px 30px;
+      text-align: center;
+    }
+
+    .message h2 {
+      margin: 0 0 10px;
+      font-size: 1.7rem;
+      font-weight: 400;
+    }
+
+    .message p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    /* Footer */
+
+    footer {
+      padding: 22px 0 38px;
+      border-top: 1px solid var(--rule);
+      color: var(--muted);
+      font: 0.72rem/1.4 system-ui, sans-serif;
+      text-align: center;
+    }
+
+    /* Mobile */
+
+    @media (max-width: 720px) {
+      header {
+        padding-top: 34px;
+      }
+
+      form {
+        grid-template-columns: 1fr;
+      }
+
+      button {
+        width: 100%;
+      }
+
+      .form-footer,
+      .results-summary {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      #status {
+        text-align: left;
+      }
+
+      #results-count {
+        white-space: normal;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="shell">
+    <p class="eyebrow">The Modern Library guide</p>
+
+    <h1>A Guide to Proust</h1>
+
+    <p class="subtitle">
+      Choose a volume and page—or a page range—to find every guide
+      entry that accompanies your reading.
+    </p>
+
+    <div class="ornament" aria-hidden="true">✦</div>
+  </header>
+
+  <main class="shell">
+    <section class="search-panel" aria-label="Search the guide">
+      <form id="search-form">
+        <label>
+          Volume
+
+          <select id="volume" required>
+            <option value="I">I</option>
+            <option value="II">II</option>
+            <option value="III">III</option>
+            <option value="IV">IV</option>
+            <option value="V">V</option>
+            <option value="VI">VI</option>
+          </select>
+        </label>
+
+        <label>
+          Page or page range
+
+          <input
+            id="pages"
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            placeholder="e.g. 23 or 23–25"
+            required
+          >
+        </label>
+
+        <button id="search-button" type="submit" disabled>
+          Search guide
+        </button>
+      </form>
+
+      <div class="form-footer">
+        <p>Use a hyphen, en dash, or double hyphen for a range.</p>
+
+        <p
+          id="status"
+          data-state="loading"
+          role="status"
+          aria-live="polite"
+        >
+          Loading the index…
+        </p>
+      </div>
+    </section>
+
+    <section class="results-region" aria-live="polite">
+      <div id="results-summary" class="results-summary" hidden>
+        <div>
+          <p class="results-kicker">Guide references</p>
+          <h2 id="results-title"></h2>
+        </div>
+
+        <p id="results-count"></p>
+      </div>
+
+      <div id="results">
+        <div class="message">
+          <h2>Read with the index beside you</h2>
+          <p>Your search runs privately in this browser with DuckDB.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="shell">
+    Queried locally with DuckDB-Wasm · Data loaded from a_guide_to_proust.parquet
+  </footer>
+
+  <script type="module">
+    const DUCKDB_MODULE =
+      "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0/+esm";
+
+    const MARKED_MODULE =
+      "https://cdn.jsdelivr.net/npm/marked@18.0.7/lib/marked.esm.js";
+
+    const DOMPURIFY_MODULE =
+      "https://cdn.jsdelivr.net/npm/dompurify@3.4.12/+esm";
+
+    const PARQUET_FILE = "a_guide_to_proust.parquet";
+    const VALID_VOLUMES = new Set(["I", "II", "III", "IV", "V", "VI"]);
+
+    const form = document.querySelector("#search-form");
+    const volumeInput = document.querySelector("#volume");
+    const pagesInput = document.querySelector("#pages");
+    const searchButton = document.querySelector("#search-button");
+    const status = document.querySelector("#status");
+    const resultsSummary = document.querySelector("#results-summary");
+    const resultsTitle = document.querySelector("#results-title");
+    const resultsCount = document.querySelector("#results-count");
+    const results = document.querySelector("#results");
+
+    let database = null;
+    let connection = null;
+    let markdownParser = null;
+    let purifier = null;
+
+    function setStatus(message, state) {
+      status.textContent = message;
+      status.dataset.state = state;
+    }
+
+    function parsePageRange(value) {
+      const match = value.match(
+        /^\s*(\d+)\s*(?:(?:-{1,2}|–|—)\s*(\d+))?\s*$/
+      );
+
+      if (!match) {
+        throw new Error(
+          "Enter one page (23) or a page range (23–25)."
+        );
+      }
+
+      const start = Number(match[1]);
+      const end = Number(match[2] ?? match[1]);
+
+      if (
+        !Number.isSafeInteger(start) ||
+        !Number.isSafeInteger(end) ||
+        start < 1 ||
+        end < 1
+      ) {
+        throw new Error("Page numbers must be positive whole numbers.");
+      }
+
+      if (start > end) {
+        throw new Error(
+          "The first page must come before the second page."
+        );
+      }
+
+      return { start, end };
+    }
+
+    function addText(parent, tag, className, text) {
+      const element = document.createElement(tag);
+
+      element.className = className;
+      element.textContent = text;
+      parent.append(element);
+
+      return element;
+    }
+
+    function addMarkdown(parent, tag, className, markdown) {
+      const element = document.createElement(tag);
+      const typographicMarkdown = (markdown ?? "").replace(/--/g, "–");
+      const rendered = markdownParser.parseInline(typographicMarkdown);
+
+      element.className = className;
+      element.innerHTML = purifier.sanitize(rendered, {
+        ALLOWED_TAGS: ["strong", "em", "code", "del", "a", "br"],
+        ALLOWED_ATTR: ["href", "title"]
+      });
+
+      parent.append(element);
+
+      return element;
+    }
+
+    function showMessage(title, text) {
+      results.replaceChildren();
+
+      const message = document.createElement("div");
+      message.className = "message";
+
+      addText(message, "h2", "", title);
+      addText(message, "p", "", text);
+
+      results.append(message);
+    }
+
+    function groupRows(rows) {
+      const sections = new Map();
+
+      for (const row of rows) {
+        if (!sections.has(row.section)) {
+          sections.set(row.section, {
+            name: row.section,
+            entries: new Map()
+          });
+        }
+
+        const section = sections.get(row.section);
+        const entryKey = String(row.row_number);
+
+        if (!section.entries.has(entryKey)) {
+          section.entries.set(entryKey, {
+            title: row.entry,
+            references: []
+          });
+        }
+
+        section.entries.get(entryKey).references.push(row.reference);
+      }
+
+      return [...sections.values()];
+    }
+
+    function renderRows(rows, volume, range) {
+      results.replaceChildren();
+
+      const sections = groupRows(rows);
+      const entryCount = sections.reduce(
+        (total, section) => total + section.entries.size,
+        0
+      );
+
+      const pageLabel =
+        range.start === range.end
+          ? String(range.start)
+          : `${range.start}–${range.end}`;
+
+      const pageWord =
+        range.start === range.end
+          ? "page"
+          : "pages";
+
+      resultsTitle.textContent =
+        `Volume ${volume}, ${pageWord} ${pageLabel}`;
+
+      resultsCount.textContent =
+        `${rows.length} ${rows.length === 1 ? "reference" : "references"} · ` +
+        `${entryCount} ${entryCount === 1 ? "entry" : "entries"} · ` +
+        `${sections.length} ${sections.length === 1 ? "section" : "sections"}`;
+
+      resultsSummary.hidden = false;
+
+      if (rows.length === 0) {
+        showMessage(
+          "No references found",
+          "Try a nearby page or check that the selected volume matches your edition."
+        );
+
+        return;
+      }
+
+      const fragment = document.createDocumentFragment();
+
+      for (const section of sections) {
+        const sectionElement = document.createElement("section");
+        sectionElement.className = "section-block";
+
+        addText(
+          sectionElement,
+          "h2",
+          "section-title",
+          section.name
+        );
+
+        const entriesElement = document.createElement("div");
+        entriesElement.className = "entries";
+
+        for (const entry of section.entries.values()) {
+          const article = document.createElement("article");
+          article.className = "entry-card";
+
+          addMarkdown(
+            article,
+            "h3",
+            "entry-title",
+            entry.title
+          );
+
+          const referenceList = document.createElement("ul");
+          referenceList.className = "references";
+
+          for (const reference of entry.references) {
+            addMarkdown(
+              referenceList,
+              "li",
+              "reference",
+              reference
+            );
+          }
+
+          article.append(referenceList);
+          entriesElement.append(article);
+        }
+
+        sectionElement.append(entriesElement);
+        fragment.append(sectionElement);
+      }
+
+      results.append(fragment);
+    }
+
+    async function searchGuide(volume, range) {
+      /*
+       * The values interpolated below are safe:
+       * volume is restricted to VALID_VOLUMES, and
+       * start/end are validated positive integers.
+       */
+      const storedVolume = `**${volume}**`;
+
+      const sql = `
+        SELECT
+          section,
+          row_number,
+          entry,
+          reference,
+          reference_index
+        FROM guide
+        WHERE list_bool_or(
+          list_transform(
+            pages,
+            lambda p:
+              p.volume = '${storedVolume}'
+              AND p.page_start <= ${range.end}
+              AND COALESCE(p.page_end, p.page_start) >= ${range.start}
+          )
+        )
+        ORDER BY row_number, reference_index
+      `;
+
+      const table = await connection.query(sql);
+
+      return table.toArray().map((row) =>
+        typeof row.toJSON === "function"
+          ? row.toJSON()
+          : row
+      );
+    }
+
+    function updateUrl(volume, range) {
+      const url = new URL(window.location.href);
+
+      url.searchParams.set("volume", volume);
+      url.searchParams.set(
+        "pages",
+        range.start === range.end
+          ? String(range.start)
+          : `${range.start}-${range.end}`
+      );
+
+      window.history.replaceState({}, "", url);
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      try {
+        const volume = volumeInput.value;
+
+        if (!VALID_VOLUMES.has(volume)) {
+          throw new Error("Choose a volume from I through VI.");
+        }
+
+        const range = parsePageRange(pagesInput.value);
+
+        searchButton.disabled = true;
+        setStatus("Searching…", "loading");
+
+        const rows = await searchGuide(volume, range);
+
+        renderRows(rows, volume, range);
+        updateUrl(volume, range);
+        setStatus("Index ready", "ready");
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : String(error);
+
+        resultsSummary.hidden = true;
+        showMessage("The guide could not be searched", message);
+        setStatus("Search error", "error");
+        pagesInput.focus();
+      } finally {
+        searchButton.disabled = !connection;
+      }
+    });
+
+    async function initialize() {
+      try {
+        if (window.location.protocol === "file:") {
+          throw new Error(
+            "Serve this folder over HTTP instead of opening index.html directly."
+          );
+        }
+
+        const [
+          duckdb,
+          markedModule,
+          domPurifyModule
+        ] = await Promise.all([
+          import(DUCKDB_MODULE),
+          import(MARKED_MODULE),
+          import(DOMPURIFY_MODULE)
+        ]);
+
+        markdownParser = markedModule.marked;
+        purifier = domPurifyModule.default;
+
+        const bundle = await duckdb.selectBundle(
+          duckdb.getJsDelivrBundles()
+        );
+
+        /*
+         * The blob creates a same-origin wrapper for the worker
+         * script hosted by jsDelivr.
+         */
+        const workerUrl = URL.createObjectURL(
+          new Blob(
+            [`importScripts("${bundle.mainWorker}");`],
+            { type: "text/javascript" }
+          )
+        );
+
+        const worker = new Worker(workerUrl);
+        const logger = new duckdb.ConsoleLogger();
+
+        database = new duckdb.AsyncDuckDB(logger, worker);
+
+        try {
+          await database.instantiate(
+            bundle.mainModule,
+            bundle.pthreadWorker
+          );
+        } finally {
+          URL.revokeObjectURL(workerUrl);
+        }
+
+        const parquetUrl = new URL(
+          `./${PARQUET_FILE}`,
+          window.location.href
+        ).href;
+
+        await database.registerFileURL(
+          PARQUET_FILE,
+          parquetUrl,
+          duckdb.DuckDBDataProtocol.HTTP,
+          false
+        );
+
+        connection = await database.connect();
+
+        await connection.query(`
+          CREATE VIEW guide AS
+          SELECT *
+          FROM read_parquet('${PARQUET_FILE}')
+        `);
+
+        searchButton.disabled = false;
+        setStatus("Index ready", "ready");
+
+        const params = new URLSearchParams(window.location.search);
+        const initialVolume = params.get("volume");
+        const initialPages = params.get("pages");
+
+        if (initialVolume && VALID_VOLUMES.has(initialVolume)) {
+          volumeInput.value = initialVolume;
+        }
+
+        if (initialPages) {
+          pagesInput.value = initialPages;
+          form.requestSubmit();
+        } else {
+          pagesInput.focus();
+        }
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : String(error);
+
+        resultsSummary.hidden = true;
+        showMessage("The index could not be loaded", message);
+        setStatus("Index unavailable", "error");
+        searchButton.disabled = true;
+      }
+    }
+
+    initialize();
+  </script>
+</body>
+</html>

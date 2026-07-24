@@ -62,7 +62,7 @@
     .eyebrow {
       margin: 0 0 12px;
       color: var(--accent);
-      font: 750 0.72rem/1.2 system-ui, sans-serif;
+      font: 750 0.8rem/1.2 system-ui, sans-serif;
       letter-spacing: 0.18em;
       text-transform: uppercase;
     }
@@ -80,23 +80,6 @@
       margin: 16px auto 0;
       color: var(--muted);
       font-size: 1.1rem;
-    }
-
-    .ornament {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      width: min(280px, 55vw);
-      margin: 18px auto 0;
-      color: var(--accent);
-    }
-
-    .ornament::before,
-    .ornament::after {
-      height: 1px;
-      flex: 1;
-      background: var(--rule);
-      content: "";
     }
 
     /* Search */
@@ -161,9 +144,9 @@
     .entry-fields {
       display: grid;
       grid-template-columns:
-        minmax(220px, 1.2fr)
-        minmax(120px, 0.55fr)
-        minmax(120px, 0.55fr)
+        minmax(180px, 1.2fr)
+        minmax(100px, 0.55fr)
+        minmax(100px, 0.55fr)
         auto;
       gap: 12px;
       align-items: end;
@@ -239,6 +222,8 @@
     }
 
     .search-button {
+      width: 168px;
+      min-width: 168px;
       padding: 0 28px;
       border: 1px solid var(--accent);
       background: var(--accent);
@@ -296,6 +281,10 @@
       text-align: right;
     }
 
+    #status:empty {
+      display: none;
+    }
+
     #status[data-state="error"] {
       color: var(--accent);
     }
@@ -319,7 +308,7 @@
       display: none;
     }
 
-    #results-kicker {
+    .results-kicker {
       margin: 0 0 5px;
       color: var(--accent);
       font: 750 0.7rem/1 system-ui, sans-serif;
@@ -327,21 +316,21 @@
       text-transform: uppercase;
     }
 
-    #results-title {
+    .results-title {
       margin: 0;
-      font-size: clamp(1.7rem, 4vw, 2.5rem);
+      font-size: 1rem;
       font-weight: 400;
-      line-height: 1.1;
+      line-height: 1.3;
     }
 
-    #results-count {
+    .results-count {
       margin: 0;
       color: var(--muted);
       font: 0.8rem/1.4 system-ui, sans-serif;
       white-space: nowrap;
     }
 
-    #results {
+    .results {
       display: grid;
       gap: 30px;
       padding-top: 24px;
@@ -535,7 +524,7 @@
         text-align: left;
       }
 
-      #results-count {
+      .results-count {
         white-space: normal;
       }
     }
@@ -559,7 +548,6 @@
       to look up references alongside your reading.
     </p>
 
-    <div class="ornament" aria-hidden="true">✦</div>
   </header>
 
   <main class="shell">
@@ -646,7 +634,7 @@
               type="submit"
               disabled
             >
-              Search guide
+              Loading...
             </button>
           </div>
 
@@ -701,7 +689,7 @@
                 autocomplete="off"
                 min="1"
                 step="1"
-                placeholder="23"
+                placeholder="1"
                 required
               >
             </label>
@@ -716,7 +704,7 @@
                 autocomplete="off"
                 min="1"
                 step="1"
-                placeholder="25"
+                placeholder="64"
               >
             </label>
           </div>
@@ -727,7 +715,7 @@
             type="submit"
             disabled
           >
-            Search guide
+            Search
           </button>
 
           <div
@@ -783,29 +771,55 @@
 
         <p
           id="status"
-          data-state="loading"
           role="status"
           aria-live="polite"
-        >
-          Loading the index…
-        </p>
+        ></p>
       </div>
     </section>
 
-    <section class="results-region" aria-live="polite">
-      <div id="results-summary" class="results-summary" hidden>
+    <section
+      id="entry-results-region"
+      class="results-region"
+      aria-label="Entry lookup results"
+      aria-live="polite"
+    >
+      <div class="results-summary" hidden>
         <div>
-          <p id="results-kicker">Guide references</p>
-          <h2 id="results-title"></h2>
+          <p class="results-kicker">Entry lookup</p>
+          <h2 class="results-title"></h2>
         </div>
 
-        <p id="results-count"></p>
+        <p class="results-count"></p>
       </div>
 
-      <div id="results">
+      <div class="results">
         <div class="message">
           <h2>Read with the index beside you</h2>
           <p>Your search runs privately in this browser with DuckDB.</p>
+        </div>
+      </div>
+    </section>
+
+    <section
+      id="page-results-region"
+      class="results-region"
+      aria-label="Page lookup results"
+      aria-live="polite"
+      hidden
+    >
+      <div class="results-summary" hidden>
+        <div>
+          <p class="results-kicker">Entry lookup</p>
+          <h2 class="results-title"></h2>
+        </div>
+
+        <p class="results-count"></p>
+      </div>
+
+      <div class="results">
+        <div class="message">
+          <h2>Look up your current page</h2>
+          <p>Choose a volume and page to find its guide references.</p>
         </div>
       </div>
     </section>
@@ -858,11 +872,23 @@
     ];
     const formHelp = document.querySelector("#form-help");
     const status = document.querySelector("#status");
-    const resultsSummary = document.querySelector("#results-summary");
-    const resultsKicker = document.querySelector("#results-kicker");
-    const resultsTitle = document.querySelector("#results-title");
-    const resultsCount = document.querySelector("#results-count");
-    const results = document.querySelector("#results");
+    const resultViews = new Map(
+      ["entry", "page"].map((mode) => {
+        const region = document.querySelector(`#${mode}-results-region`);
+
+        return [
+          mode,
+          {
+            region,
+            summary: region.querySelector(".results-summary"),
+            kicker: region.querySelector(".results-kicker"),
+            title: region.querySelector(".results-title"),
+            count: region.querySelector(".results-count"),
+            results: region.querySelector(".results")
+          }
+        ];
+      })
+    );
 
     let database = null;
     let connection = null;
@@ -872,6 +898,11 @@
     function setStatus(message, state) {
       status.textContent = message;
       status.dataset.state = state;
+    }
+
+    function clearStatus() {
+      status.textContent = "";
+      delete status.dataset.state;
     }
 
     function setSearchButtonsDisabled(disabled) {
@@ -888,11 +919,14 @@
       pageTab.tabIndex = isEntryMode ? -1 : 0;
       entryPanel.hidden = !isEntryMode;
       pagePanel.hidden = isEntryMode;
+      resultViews.get("entry").region.hidden = !isEntryMode;
+      resultViews.get("page").region.hidden = isEntryMode;
       formHelp.textContent = isEntryMode
         ? "Search entry names without matching case or accents."
         : "Leave ending page blank to search one page.";
 
       if (updateUrl) {
+        clearStatus();
         const url = new URL(window.location.href);
         url.searchParams.set("mode", mode);
         window.history.replaceState({}, "", url);
@@ -1087,7 +1121,9 @@
       return element;
     }
 
-    function showMessage(title, text) {
+    function showMessage(mode, title, text) {
+      const { results } = resultViews.get(mode);
+
       results.replaceChildren();
 
       const message = document.createElement("div");
@@ -1126,8 +1162,14 @@
       return [...sections.values()];
     }
 
-    function renderRows(rows, { kicker, title, emptyTitle, emptyText }) {
-      results.replaceChildren();
+    function renderRows(
+      mode,
+      rows,
+      { kicker, title, emptyTitle, emptyText }
+    ) {
+      const view = resultViews.get(mode);
+
+      view.results.replaceChildren();
 
       const sections = groupRows(rows);
       const entryCount = sections.reduce(
@@ -1135,18 +1177,18 @@
         0
       );
 
-      resultsKicker.textContent = kicker;
-      resultsTitle.textContent = title;
+      view.kicker.textContent = kicker;
+      view.title.textContent = title;
 
-      resultsCount.textContent =
+      view.count.textContent =
         `${rows.length} ${rows.length === 1 ? "reference" : "references"} · ` +
         `${entryCount} ${entryCount === 1 ? "entry" : "entries"} · ` +
         `${sections.length} ${sections.length === 1 ? "section" : "sections"}`;
 
-      resultsSummary.hidden = false;
+      view.summary.hidden = false;
 
       if (rows.length === 0) {
-        showMessage(emptyTitle, emptyText);
+        showMessage(mode, emptyTitle, emptyText);
 
         return;
       }
@@ -1198,7 +1240,7 @@
         fragment.append(sectionElement);
       }
 
-      results.append(fragment);
+      view.results.append(fragment);
     }
 
     function renderPageRows(rows, volume, range) {
@@ -1209,9 +1251,9 @@
 
       const pageWord = range.start === range.end ? "page" : "pages";
 
-      renderRows(rows, {
-        kicker: "Guide references",
-        title: `Volume ${volume}, ${pageWord} ${pageLabel}`,
+      renderRows("page", rows, {
+        kicker: "Entry lookup",
+        title: `Entries mentioned in Volume ${volume}, ${pageWord} ${pageLabel}`,
         emptyTitle: "No references found",
         emptyText:
           "Try a nearby page or check that the selected volume matches your edition."
@@ -1223,7 +1265,7 @@
         ? ` through Volume ${spoiler.volume}, page ${spoiler.page}`
         : "";
 
-      renderRows(rows, {
+      renderRows("entry", rows, {
         kicker: "Entry lookup",
         title: `Entries matching “${name}”${cutoff}`,
         emptyTitle: spoiler
@@ -1421,21 +1463,20 @@
         const sectionKeys = selectedPageSections();
 
         setSearchButtonsDisabled(true);
-        setStatus("Searching…", "loading");
+        clearStatus();
 
         const rows = await searchByPage(volume, range, sectionKeys);
 
         renderPageRows(rows, volume, range);
         updatePageUrl(volume, range, sectionKeys);
-        setStatus("Index ready", "ready");
       } catch (error) {
         const message =
           error instanceof Error
             ? error.message
             : String(error);
 
-        resultsSummary.hidden = true;
-        showMessage("The guide could not be searched", message);
+        resultViews.get("page").summary.hidden = true;
+        showMessage("page", "The guide could not be searched", message);
         setStatus("Search error", "error");
         focusPageInput(error);
       } finally {
@@ -1450,21 +1491,20 @@
         const { name, spoiler } = parseEntrySearch();
 
         setSearchButtonsDisabled(true);
-        setStatus("Searching…", "loading");
+        clearStatus();
 
         const rows = await searchByEntry(name, spoiler);
 
         renderEntryRows(rows, name, spoiler);
         updateEntryUrl(name, spoiler);
-        setStatus("Index ready", "ready");
       } catch (error) {
         const message =
           error instanceof Error
             ? error.message
             : String(error);
 
-        resultsSummary.hidden = true;
-        showMessage("The guide could not be searched", message);
+        resultViews.get("entry").summary.hidden = true;
+        showMessage("entry", "The guide could not be searched", message);
         setStatus("Search error", "error");
         focusEntryInput(error);
       } finally {
@@ -1496,7 +1536,87 @@
       });
     }
 
-    async function initialize() {
+    function hydrateInputsFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const requestedMode = params.get("mode");
+      const initialEntry = params.get("entry");
+      const initialVolume = params.get("volume");
+      const initialPages = params.get("pages");
+      const initialSections = params.get("sections");
+      const throughVolume = params.get("through_volume");
+      const throughPage = params.get("through_page");
+      const includeLaterCf = params.get("include_later_cf");
+      let initialPageError = null;
+
+      if (initialVolume && VALID_VOLUMES.has(initialVolume)) {
+        volumeInput.value = initialVolume;
+      }
+
+      if (initialPages) {
+        try {
+          const range = parseLegacyPageRange(initialPages);
+
+          pageStartInput.value = String(range.start);
+          pageEndInput.value =
+            range.start === range.end
+              ? ""
+              : String(range.end);
+        } catch (error) {
+          initialPageError = error;
+        }
+      }
+
+      if (initialSections !== null) {
+        const selectedKeys = new Set(
+          initialSections === "none"
+            ? []
+            : initialSections.split(",").filter((key) => PAGE_SECTIONS.has(key))
+        );
+
+        for (const input of pageSectionInputs) {
+          input.checked = selectedKeys.has(input.value);
+        }
+      }
+
+      if (initialEntry !== null) {
+        entryNameInput.value = initialEntry;
+      }
+
+      limitSpoilersInput.checked =
+        Boolean(throughVolume || throughPage) || initialEntry === null;
+
+      if (throughVolume && VALID_VOLUMES.has(throughVolume)) {
+        throughVolumeInput.value = throughVolume;
+      }
+
+      if (throughPage) {
+        throughPageInput.value = throughPage;
+      }
+
+      includeLaterCfInput.checked =
+        includeLaterCf === "1" || includeLaterCf === "true";
+      syncSpoilerFields();
+
+      const initialMode =
+        requestedMode === "entry" || requestedMode === "page"
+          ? requestedMode
+          : initialEntry
+            ? "entry"
+            : initialPages
+              ? "page"
+              : "entry";
+
+      setActiveMode(initialMode);
+
+      return {
+        initialEntry,
+        initialMode,
+        initialPageError,
+        initialPages
+      };
+    }
+
+    async function initialize(initialUrlState) {
       try {
         if (window.location.protocol === "file:") {
           throw new Error(
@@ -1566,79 +1686,16 @@
           FROM read_parquet('${PARQUET_FILE}')
         `);
 
+        entrySearchButton.textContent = "Search";
         setSearchButtonsDisabled(false);
-        setStatus("Index ready", "ready");
+        clearStatus();
 
-        const params = new URLSearchParams(window.location.search);
-        const requestedMode = params.get("mode");
-        const initialEntry = params.get("entry");
-        const initialVolume = params.get("volume");
-        const initialPages = params.get("pages");
-        const initialSections = params.get("sections");
-        const throughVolume = params.get("through_volume");
-        const throughPage = params.get("through_page");
-        const includeLaterCf = params.get("include_later_cf");
-        let initialPageError = null;
-
-        if (initialVolume && VALID_VOLUMES.has(initialVolume)) {
-          volumeInput.value = initialVolume;
-        }
-
-        if (initialPages) {
-          try {
-            const range = parseLegacyPageRange(initialPages);
-
-            pageStartInput.value = String(range.start);
-            pageEndInput.value =
-              range.start === range.end
-                ? ""
-                : String(range.end);
-          } catch (error) {
-            initialPageError = error;
-          }
-        }
-
-        if (initialSections !== null) {
-          const selectedKeys = new Set(
-            initialSections === "none"
-              ? []
-              : initialSections.split(",").filter((key) => PAGE_SECTIONS.has(key))
-          );
-
-          for (const input of pageSectionInputs) {
-            input.checked = selectedKeys.has(input.value);
-          }
-        }
-
-        if (initialEntry !== null) {
-          entryNameInput.value = initialEntry;
-        }
-
-        limitSpoilersInput.checked =
-          Boolean(throughVolume || throughPage) || initialEntry === null;
-
-        if (throughVolume && VALID_VOLUMES.has(throughVolume)) {
-          throughVolumeInput.value = throughVolume;
-        }
-
-        if (throughPage) {
-          throughPageInput.value = throughPage;
-        }
-
-        includeLaterCfInput.checked =
-          includeLaterCf === "1" || includeLaterCf === "true";
-        syncSpoilerFields();
-
-        const initialMode =
-          requestedMode === "entry" || requestedMode === "page"
-            ? requestedMode
-            : initialEntry
-              ? "entry"
-              : initialPages
-                ? "page"
-                : "entry";
-
-        setActiveMode(initialMode);
+        const {
+          initialEntry,
+          initialMode,
+          initialPageError,
+          initialPages
+        } = initialUrlState;
 
         if (initialMode === "entry" && initialEntry !== null) {
           entryForm.requestSubmit();
@@ -1650,8 +1707,8 @@
               ? initialPageError.message
               : String(initialPageError);
 
-          resultsSummary.hidden = true;
-          showMessage("The guide could not be searched", message);
+          resultViews.get("page").summary.hidden = true;
+          showMessage("page", "The guide could not be searched", message);
           setStatus("Search error", "error");
           pageStartInput.focus();
         } else if (initialMode === "entry") {
@@ -1665,14 +1722,18 @@
             ? error.message
             : String(error);
 
-        resultsSummary.hidden = true;
-        showMessage("The index could not be loaded", message);
-        setStatus("Index unavailable", "error");
+        for (const [mode, view] of resultViews) {
+          view.summary.hidden = true;
+          showMessage(mode, "The index could not be loaded", message);
+        }
+        entrySearchButton.textContent = "Guide unavailable";
+        clearStatus();
         setSearchButtonsDisabled(true);
       }
     }
 
-    initialize();
+    const initialUrlState = hydrateInputsFromUrl();
+    initialize(initialUrlState);
   </script>
 </body>
 </html>

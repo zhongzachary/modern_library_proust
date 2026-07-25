@@ -1,9 +1,5 @@
 # %%
-from cmath import e
-from operator import sub
-
 import polars as pl
-from polars.lazyframe.frame import T
 
 # %%
 # read the raw guide as lines_df
@@ -157,6 +153,14 @@ with open("../formatted_guide_to_proust.md", "w") as f:
 # %%
 # a page_ref looks something like: **I** 1, **V** 320--21, 400--8, 100
 volume_re = r"\*\*(I|II|III|IV|V|VI)\**\**"
+volume_numbers = {
+    "**I**": 1,
+    "**II**": 2,
+    "**III**": 3,
+    "**IV**": 4,
+    "**V**": 5,
+    "**VI**": 6,
+}
 page_re = r"\d+(?:--\d+)?"
 page_ref_re = rf"({volume_re} )?{page_re}"
 
@@ -248,6 +252,13 @@ fill_volume_pages_df = (
         .fill_null(strategy="forward")
         .over("entry_index")
     )
+    .with_columns(
+        volume_number=pl.col("volume").replace_strict(
+            volume_numbers,
+            default=None,
+            return_dtype=pl.UInt8,
+        )
+    )
     .group_by(
         "section",
         "group",
@@ -259,9 +270,19 @@ fill_volume_pages_df = (
         maintain_order=True,
     )
     .agg(
-        pages=pl.struct(
-            "page_text", "is_parenthesized", "volume", "page_start", "page_end"
+        reference_volume=pl.col("volume_number")
+        .filter(
+            pl.col("page_text").is_not_null() & pl.col("is_parenthesized").eq(False)
         )
+        .first(),
+        pages=pl.struct(
+            "page_text",
+            "is_parenthesized",
+            "volume",
+            "volume_number",
+            "page_start",
+            "page_end",
+        ),
     )
     .with_columns(
         pages=pl.col("pages").list.filter(

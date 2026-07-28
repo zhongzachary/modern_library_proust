@@ -131,43 +131,55 @@
       display: none;
     }
 
-    .page-form {
-      display: grid;
-      grid-template-columns:
-        minmax(140px, 0.6fr)
-        minmax(120px, 0.7fr)
-        minmax(120px, 0.7fr)
-        auto;
-      gap: 12px;
-      align-items: end;
-    }
-
-    .entry-fields {
-      display: grid;
-      grid-template-columns:
-        minmax(180px, 1.2fr)
-        minmax(100px, 0.55fr)
-        minmax(100px, 0.55fr)
-        auto;
-      gap: 12px;
-      align-items: end;
-    }
-
-    .entry-options {
+    .search-form {
       display: flex;
-      align-items: center;
-      gap: 24px;
-      margin-top: 14px;
+      min-height: 360px;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .entry-name-field {
+      width: 100%;
+    }
+
+    .page-query-fields {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      align-items: end;
     }
 
     .spoiler-fields {
-      display: contents;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      align-items: end;
     }
 
     .spoiler-fields.is-disabled label,
     .include-cf-field.is-disabled {
       opacity: 0.45;
       cursor: not-allowed;
+    }
+
+    .spoiler-settings {
+      display: grid;
+      gap: 8px;
+    }
+
+    .spoiler-heading {
+      display: flex;
+      min-height: 44px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .spoiler-title {
+      color: var(--ink);
+      font: 750 0.82rem/1.2 system-ui, sans-serif;
+      letter-spacing: 0;
+      text-transform: uppercase;
     }
 
     label {
@@ -180,35 +192,46 @@
     }
 
     .page-fields {
-      display: contents;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      align-items: end;
     }
 
     .section-filters {
-      display: flex;
-      align-items: center;
-      gap: 6px 12px;
-      margin: 12px 0 0;
-      flex-wrap: wrap;
-    }
-
-    .page-form > .section-filters {
-      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: stretch;
       margin: 0;
     }
 
     .section-filters-label {
+      display: flex;
+      align-items: center;
+      padding-right: 16px;
+      border-right: 1px solid var(--rule);
       color: var(--muted);
       font: 700 0.82rem/1.2 system-ui, sans-serif;
       white-space: nowrap;
+      text-transform: uppercase;
     }
 
-    .section-filters .checkbox-field {
+    .section-filter-options {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px 16px;
+      align-items: center;
+      padding-left: 16px;
+    }
+
+    .section-filter-options .checkbox-field {
       gap: 4px;
+      width: 100%;
       min-height: 24px;
       white-space: nowrap;
     }
 
-    .section-filters .checkbox-field input {
+    .section-filter-options .checkbox-field input {
       width: 15px;
       height: 15px;
     }
@@ -260,8 +283,8 @@
     }
 
     .search-button {
-      width: 168px;
-      min-width: 168px;
+      width: 100%;
+      min-width: 0;
       padding: 0 28px;
       border: 1px solid var(--accent);
       background: var(--accent);
@@ -279,6 +302,11 @@
     .search-button:disabled {
       cursor: wait;
       opacity: 0.55;
+    }
+
+    .search-form > .search-button {
+      align-self: stretch;
+      margin-top: auto;
     }
 
     .checkbox-field {
@@ -300,6 +328,60 @@
       height: 17px;
       margin: 0;
       accent-color: var(--accent);
+    }
+
+    .switch-field {
+      position: relative;
+      display: inline-flex;
+      width: 44px;
+      height: 44px;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .switch-field input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+    }
+
+    .switch-control {
+      position: relative;
+      width: 42px;
+      height: 24px;
+      border: 1px solid var(--rule);
+      border-radius: 999px;
+      background: #ded7cc;
+      transition: background 150ms ease, border-color 150ms ease;
+    }
+
+    .switch-control::after {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 1px 3px #3b2b1b3d;
+      content: "";
+      transition: transform 150ms ease;
+    }
+
+    .switch-field input:checked + .switch-control {
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+
+    .switch-field input:checked + .switch-control::after {
+      transform: translateX(18px);
+    }
+
+    .switch-field input:focus-visible + .switch-control {
+      outline: 3px solid #7c302940;
+      outline-offset: 3px;
     }
 
     #status {
@@ -551,47 +633,30 @@
         line-height: 1.25;
       }
 
-      .page-form {
-        grid-template-columns: 1fr;
+      .search-form {
+        min-height: 404px;
       }
 
-      .entry-fields {
-        grid-template-columns: 1fr;
+      .section-filters-label {
+        width: 54px;
+        padding-right: 10px;
+        white-space: normal;
       }
 
-      .spoiler-fields {
-        display: grid;
+      .section-filter-options {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
+        gap: 6px 8px;
+        padding-left: 10px;
       }
 
-      .entry-options {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .page-fields {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
-      }
-
-      .section-filters {
-        column-gap: 5px;
-      }
-
-      .section-filters .checkbox-field {
+      .section-filter-options .checkbox-field {
         gap: 3px;
+        font-size: 0.78rem;
       }
 
-      .section-filters .checkbox-field input {
+      .section-filter-options .checkbox-field input {
         width: 14px;
         height: 14px;
-      }
-
-      .search-button {
-        width: 100%;
       }
 
       .results-summary {
@@ -612,6 +677,11 @@
       html {
         scroll-behavior: auto;
       }
+
+      .switch-control,
+      .switch-control::after {
+        transition: none;
+      }
     }
   </style>
 </head>
@@ -623,8 +693,9 @@
     <p class="eyebrow">Based on Modern Library 6-Volume <i>In Search of Lost Time</i></p>
 
     <p class="subtitle">
-      Find a guide entry by name, or choose a volume and page range
-      to look up references alongside your reading.
+      Search entries in <i>A Guide to Proust</i> with spoiler protection
+      <br>
+      (There might still be spoiler though.)
     </p>
 
   </header>
@@ -664,21 +735,98 @@
         role="tabpanel"
         aria-labelledby="entry-tab"
       >
-        <form id="entry-form" novalidate>
-          <div class="entry-fields">
-            <label>
-              <span>
-                Entry name
-                <span class="label-note">(Case &amp; Accent Insensitive)</span>
+        <form id="entry-form" class="search-form" novalidate>
+          <div
+            class="section-filters"
+            role="group"
+            aria-label="Entry types"
+          >
+            <span class="section-filters-label">Show index</span>
+
+            <div class="section-filter-options">
+              <label class="checkbox-field">
+                <input
+                  name="entry-section"
+                  type="checkbox"
+                  value="characters"
+                  checked
+                >
+                <span>Characters</span>
+              </label>
+
+              <label class="checkbox-field">
+                <input
+                  name="entry-section"
+                  type="checkbox"
+                  value="persons"
+                  checked
+                >
+                <span>Persons</span>
+              </label>
+
+              <label class="checkbox-field">
+                <input
+                  name="entry-section"
+                  type="checkbox"
+                  value="places"
+                  checked
+                >
+                <span>Places</span>
+              </label>
+
+              <label class="checkbox-field">
+                <input
+                  name="entry-section"
+                  type="checkbox"
+                  value="themes"
+                  checked
+                >
+                <span>Themes</span>
+              </label>
+            </div>
+          </div>
+
+          <label class="entry-name-field">
+            <span>
+              Entry name
+              <span class="label-note">(Case &amp; Accent Insensitive)</span>
+            </span>
+
+            <input
+              id="entry-name"
+              type="search"
+              autocomplete="off"
+              placeholder="Swann"
+              required
+            >
+          </label>
+
+          <div
+            class="spoiler-settings"
+            role="group"
+            aria-labelledby="spoiler-protection-label"
+          >
+            <div class="spoiler-heading">
+              <span id="spoiler-protection-label" class="spoiler-title">
+                Spoiler protection
               </span>
 
-              <input
-                id="entry-name"
-                type="search"
-                autocomplete="off"
-                placeholder="Swann"
-                required
-              >
+              <label class="switch-field" title="Toggle spoiler protection">
+                <input
+                  id="limit-spoilers"
+                  type="checkbox"
+                  role="switch"
+                  aria-label="Spoiler protection"
+                  aria-controls="spoiler-fields"
+                  checked
+                >
+                <span class="switch-control" aria-hidden="true"></span>
+              </label>
+            </div>
+
+            <label class="checkbox-field include-cf-field">
+              <input id="include-later-cf" type="checkbox">
+              <span>Include cf. mentions from future pages (potential spoilers)</span>
             </label>
 
             <div id="spoiler-fields" class="spoiler-fields">
@@ -709,81 +857,16 @@
                 >
               </label>
             </div>
-
-            <button
-              id="entry-search-button"
-              class="search-button"
-              type="submit"
-              disabled
-            >
-              Loading...
-            </button>
           </div>
 
-          <div
-            class="section-filters"
-            role="group"
-            aria-label="Entry types"
+          <button
+            id="entry-search-button"
+            class="search-button"
+            type="submit"
+            disabled
           >
-            <span class="section-filters-label">Show:</span>
-
-            <label class="checkbox-field">
-              <input
-                name="entry-section"
-                type="checkbox"
-                value="characters"
-                checked
-              >
-              <span>Characters</span>
-            </label>
-
-            <label class="checkbox-field">
-              <input
-                name="entry-section"
-                type="checkbox"
-                value="persons"
-                checked
-              >
-              <span>Persons</span>
-            </label>
-
-            <label class="checkbox-field">
-              <input
-                name="entry-section"
-                type="checkbox"
-                value="places"
-                checked
-              >
-              <span>Places</span>
-            </label>
-
-            <label class="checkbox-field">
-              <input
-                name="entry-section"
-                type="checkbox"
-                value="themes"
-                checked
-              >
-              <span>Themes</span>
-            </label>
-          </div>
-
-          <div class="entry-options">
-            <label class="checkbox-field">
-              <input
-                id="limit-spoilers"
-                type="checkbox"
-                aria-controls="spoiler-fields"
-                checked
-              >
-              <span>Hide spoilers based on current volume/page</span>
-            </label>
-
-            <label class="checkbox-field include-cf-field">
-              <input id="include-later-cf" type="checkbox">
-              <span>Include later cf. references</span>
-            </label>
-          </div>
+            Loading...
+          </button>
         </form>
       </div>
 
@@ -794,52 +877,104 @@
         aria-labelledby="page-tab"
         hidden
       >
-        <form id="page-form" class="page-form" novalidate>
-          <label>
-            Volume
+        <form id="page-form" class="search-form" novalidate>
+          <div
+            class="section-filters"
+            role="group"
+            aria-label="Entry types"
+          >
+            <span class="section-filters-label">Show index</span>
 
-            <select id="volume" required>
-              <option value="I">I</option>
-              <option value="II">II</option>
-              <option value="III">III</option>
-              <option value="IV">IV</option>
-              <option value="V">V</option>
-              <option value="VI">VI</option>
-            </select>
-          </label>
+            <div class="section-filter-options">
+              <label class="checkbox-field">
+                <input
+                  name="page-section"
+                  type="checkbox"
+                  value="characters"
+                  checked
+                >
+                <span>Characters</span>
+              </label>
 
-          <div class="page-fields">
+              <label class="checkbox-field">
+                <input
+                  name="page-section"
+                  type="checkbox"
+                  value="persons"
+                  checked
+                >
+                <span>Persons</span>
+              </label>
+
+              <label class="checkbox-field">
+                <input
+                  name="page-section"
+                  type="checkbox"
+                  value="places"
+                  checked
+                >
+                <span>Places</span>
+              </label>
+
+              <label class="checkbox-field">
+                <input
+                  name="page-section"
+                  type="checkbox"
+                  value="themes"
+                  checked
+                >
+                <span>Themes</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="page-query-fields">
             <label>
-              Starting page
+              Volume
 
-              <input
-                id="page-start"
-                type="number"
-                inputmode="numeric"
-                autocomplete="off"
-                min="1"
-                step="1"
-                placeholder="1"
-                required
-              >
+              <select id="volume" required>
+                <option value="I">I</option>
+                <option value="II">II</option>
+                <option value="III">III</option>
+                <option value="IV">IV</option>
+                <option value="V">V</option>
+                <option value="VI">VI</option>
+              </select>
             </label>
 
-            <label>
-              <span>
-                Ending page
-                <span class="label-note">(Optional)</span>
-              </span>
+            <div class="page-fields">
+              <label>
+                Starting page
 
-              <input
-                id="page-end"
-                type="number"
-                inputmode="numeric"
-                autocomplete="off"
-                min="1"
-                step="1"
-                placeholder="64"
-              >
-            </label>
+                <input
+                  id="page-start"
+                  type="number"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  min="1"
+                  step="1"
+                  placeholder="1"
+                  required
+                >
+              </label>
+
+              <label>
+                <span>
+                  Ending page
+                  <span class="label-note">(Optional)</span>
+                </span>
+
+                <input
+                  id="page-end"
+                  type="number"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  min="1"
+                  step="1"
+                  placeholder="64"
+                >
+              </label>
+            </div>
           </div>
 
           <button
@@ -848,56 +983,8 @@
             type="submit"
             disabled
           >
-            Search
+            Loading...
           </button>
-
-          <div
-            class="section-filters"
-            role="group"
-            aria-label="Entry types"
-          >
-            <span class="section-filters-label">Show:</span>
-
-            <label class="checkbox-field">
-              <input
-                name="page-section"
-                type="checkbox"
-                value="characters"
-                checked
-              >
-              <span>Characters</span>
-            </label>
-
-            <label class="checkbox-field">
-              <input
-                name="page-section"
-                type="checkbox"
-                value="persons"
-                checked
-              >
-              <span>Persons</span>
-            </label>
-
-            <label class="checkbox-field">
-              <input
-                name="page-section"
-                type="checkbox"
-                value="places"
-                checked
-              >
-              <span>Places</span>
-            </label>
-
-            <label class="checkbox-field">
-              <input
-                name="page-section"
-                type="checkbox"
-                value="themes"
-                checked
-              >
-              <span>Themes</span>
-            </label>
-          </div>
         </form>
       </div>
 
@@ -1558,9 +1645,9 @@
           section,
           entry_index,
           entry,
-          reference,
+          if(entry = reference, NULL, reference) AS reference,
           reference_index,
-          ${displayReferenceVolumeSql()} AS reference_volume
+          if(entry = reference, NULL, ${displayReferenceVolumeSql()}) AS reference_volume
         FROM guide
         WHERE list_bool_or(
           list_transform(
@@ -1974,6 +2061,7 @@
         `);
 
         entrySearchButton.textContent = "Search";
+        pageSearchButton.textContent = "Search";
         setSearchButtonsDisabled(false);
         clearStatus();
 
@@ -2013,6 +2101,7 @@
           showMessage(mode, "The index could not be loaded", message);
         }
         entrySearchButton.textContent = "Guide unavailable";
+        pageSearchButton.textContent = "Guide unavailable";
         clearStatus();
         setSearchButtonsDisabled(true);
       }

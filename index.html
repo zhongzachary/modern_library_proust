@@ -493,6 +493,44 @@
       text-align: center;
     }
 
+    .back-to-top {
+      position: fixed;
+      right: calc(16px + env(safe-area-inset-right));
+      bottom: calc(16px + env(safe-area-inset-bottom));
+      z-index: 10;
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      padding: 0;
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      background: var(--card);
+      box-shadow: 0 5px 18px #3b2b1b26;
+      color: var(--accent);
+      cursor: pointer;
+    }
+
+    .back-to-top:hover {
+      background: var(--accent);
+      color: white;
+    }
+
+    .back-to-top:focus-visible {
+      outline: 3px solid #7c302940;
+      outline-offset: 3px;
+    }
+
+    .back-to-top:active {
+      transform: translateY(1px);
+    }
+
+    .back-to-top svg {
+      width: 22px;
+      height: 22px;
+      stroke-width: 2;
+    }
+
     /* Mobile */
 
     @media (max-width: 720px) {
@@ -922,6 +960,27 @@
     Queried locally with DuckDB-Wasm · Data loaded from a_guide_to_proust.parquet
   </footer>
 
+  <button
+    id="back-to-top"
+    class="back-to-top"
+    type="button"
+    aria-label="Back to top"
+    title="Back to top"
+  >
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="m5 12 7-7 7 7"></path>
+      <path d="M12 19V5"></path>
+    </svg>
+  </button>
+
   <script type="module">
     const DUCKDB_MODULE =
       "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0/+esm";
@@ -967,6 +1026,7 @@
       ...document.querySelectorAll('input[name="page-section"]')
     ];
     const status = document.querySelector("#status");
+    const backToTopButton = document.querySelector("#back-to-top");
     const resultViews = new Map(
       ["entry", "page"].map((mode) => {
         const region = document.querySelector(`#${mode}-results-region`);
@@ -1567,12 +1627,11 @@
           section,
           entry_index,
           entry,
-          reference,
+          if(entry = reference, NULL, reference) AS reference,
           reference_index,
-          ${displayReferenceVolumeSql()} AS reference_volume
+          if(entry = reference, NULL, ${displayReferenceVolumeSql()}) AS reference_volume
         FROM guide
-        WHERE reference <> entry
-          AND strip_accents(lower(entry)) LIKE
+        WHERE strip_accents(lower(entry)) LIKE
             '%' || strip_accents(lower(?)) || '%'
           ${spoilerClause}
           ${sectionClause}
@@ -1958,6 +2017,10 @@
         setSearchButtonsDisabled(true);
       }
     }
+
+    backToTopButton.addEventListener("click", () => {
+      window.scrollTo({ top: 0, left: 0 });
+    });
 
     const initialUrlState = hydrateInputsFromUrl();
     initialize(initialUrlState);

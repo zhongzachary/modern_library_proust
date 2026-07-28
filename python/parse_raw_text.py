@@ -1,5 +1,8 @@
 # %%
+from tabnanny import check
+
 import polars as pl
+import duckdb
 
 # %%
 # read the raw guide as lines_df
@@ -291,4 +294,83 @@ fill_volume_pages_df = (
     )
 )
 
-fill_volume_pages_df.write_parquet("../a_guide_to_proust.parquet")
+# %%
+# determine volume-grouped index
+# to show results in a more condense format, all references of the under entry will be grouped to the previous one if and only if
+# 1. same lowest volume mentioned
+# 2. grouping together will not increased the number of volumes mentioned to exceed 2
+# e.g.
+# - previous references mention volume I, current reference metions volumes I and III -> group together
+# - previous references mention volumn I, current reference metions volume II
+#   -> NOT group together, since they don't have the same lowest volume mentioned
+# - previous references mention volume I and II, current reference metions volumes I and III
+#   -> NOT group together, otherwise the total volumes mentioned will be I, II, and III (exceeding 2)
+last_df_name = f'{fill_volume_pages_df=}'.split('=')[0]
+vol_grouped_refs_sql = f"""
+with recursive
+    ref_vols AS (
+        select
+            entry_index,
+            reference_index,
+            lag(reference_index) over (partition by entry_index order by reference_index) as last_ref,
+            list_sort(
+                list_distinct(
+                    list_transform(pages, lambda p: if(p.is_parenthesized, NULL, p.volume_number))
+                )
+            ) as vols,
+        from {last_df_name}
+    ),
+    vol_grouped_refs AS (
+        select
+            entry_index,
+            reference_index,
+            vols,
+            reference_index as vol_grouped_ref_index,
+        from ref_vols
+        where last_ref IS NULL
+
+        union all
+
+        select
+            ref_vols.entry_index,
+            ref_vols.reference_index,
+            case
+              when ifnull(list_min(ref_vols.vols) = list_min(vol_grouped_refs.vols), false)
+               and list_count(list_distinct(ref_vols.vols || vol_grouped_refs.vols)) < 3
+              then list_sort(list_distinct(ref_vols.vols || vol_grouped_refs.vols))
+              else ref_vols.vols
+            end as vols,
+            case
+              when ifnull(list_min(ref_vols.vols) = list_min(vol_grouped_refs.vols), false)
+               and list_count(list_distinct(ref_vols.vols || vol_grouped_refs.vols)) < 3
+              then vol_grouped_refs.vol_grouped_ref_index
+              else ref_vols.reference_index
+            end as vol_grouped_ref_index,
+        from ref_vols, vol_grouped_refs
+        where ref_vols.last_ref = vol_grouped_refs.reference_index
+    )
+select
+    main_df.*,
+    vol_grouped_refs.vol_grouped_ref_index,
+    if(list_count(vol_grouped_refs.vols) > 2, NULL, list_min(vol_grouped_refs.vols)) as vol_grouped_ref_display_vol,
+from {last_df_name} as main_df
+join vol_grouped_refs
+  using (entry_index, reference_index)
+order by entry_index, reference_index
+"""
+vol_grouped_ref_df = duckdb.execute(vol_grouped_refs_sql).pl()
+
+
+check_vol_grouped_ref_display_logic = duckdb.execute("""
+select
+    vol_grouped_ref_index,
+    list(distinct vol_grouped_ref_display_vol) vols
+from vol_grouped_ref_df
+group by all
+having list_count(vols) > 1
+""").pl()
+if not check_vol_grouped_ref_display_logic.is_empty():
+    raise ValueError('Error with the volume-grouped reference display logic. Some volume-grouped refereces have more than 1 displaying volumes.')
+
+# %%
+vol_grouped_ref_df.write_parquet("../a_guide_to_proust.parquet")

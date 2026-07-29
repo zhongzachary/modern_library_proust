@@ -480,11 +480,23 @@
       border-top: 1px solid var(--rule);
     }
 
+    .super-entry-title {
+      margin: 0 0 10px;
+      color: var(--accent);
+      font-size: 1.12rem;
+      font-weight: 400;
+      line-height: 1.35;
+    }
+
     .entry-title {
       margin: 0 0 5px;
       padding: 0;
       font-size: 1rem;
       line-height: 1.35;
+    }
+
+    .entry-card-entry-item + .entry-card-entry-item {
+      margin-top: 10px;
     }
 
     /* References */
@@ -522,16 +534,19 @@
 
     /* Markdown */
 
+    .super-entry-title strong,
     .entry-title strong,
     .reference-volume-reference strong {
       font-weight: 700;
     }
 
+    .super-entry-title em,
     .entry-title em,
     .reference-volume-reference em {
       font-style: italic;
     }
 
+    .super-entry-title a,
     .entry-title a,
     .reference-volume-reference a {
       color: var(--accent);
@@ -539,6 +554,7 @@
       text-underline-offset: 2px;
     }
 
+    .super-entry-title code,
     .entry-title code,
     .reference-volume-reference code {
       font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
@@ -1079,6 +1095,7 @@
       "https://cdn.jsdelivr.net/npm/dompurify@3.4.12/+esm";
 
     const PARQUET_FILE = "a_guide_to_proust.parquet";
+    const PARQUET_SCHEMA_VERSION = "3";
     const VOLUMES = ["I", "II", "III", "IV", "V", "VI"];
     const VALID_VOLUMES = new Set(VOLUMES);
     const GUIDE_SECTIONS = new Map([
@@ -1406,44 +1423,53 @@
       results.append(message);
     }
 
-    function groupRows(rows) {
+    function organizeResultRows(rows) {
       const sections = new Map();
 
       for (const row of rows) {
         if (!sections.has(row.section)) {
           sections.set(row.section, {
             name: row.section,
-            entries: new Map()
+            cards: new Map()
           });
         }
 
         const section = sections.get(row.section);
         const entryKey = String(row.entry_index);
+        const hasSuperEntry = Boolean(row.super_entry);
+        const cardKey = hasSuperEntry
+          ? `super:${String(row.super_entry_index ?? row.super_entry)}`
+          : `entry:${entryKey}`;
 
-        if (!section.entries.has(entryKey)) {
-          section.entries.set(entryKey, {
-            title: row.entry,
-            referencesByVolume: new Map(),
-            ungroupedReferences: []
+        if (!section.cards.has(cardKey)) {
+          section.cards.set(cardKey, {
+            superEntry: hasSuperEntry ? row.super_entry : null,
+            entries: new Map()
           });
         }
 
-        const entry = section.entries.get(entryKey);
-        const referenceVolume = Number(row.reference_volume);
+        const card = section.cards.get(cardKey);
 
-        if (
-          Number.isInteger(referenceVolume) &&
-          referenceVolume >= 1 &&
-          referenceVolume <= VOLUMES.length
-        ) {
-          if (!entry.referencesByVolume.has(referenceVolume)) {
-            entry.referencesByVolume.set(referenceVolume, []);
-          }
-
-          entry.referencesByVolume.get(referenceVolume).push(row.reference);
-        } else {
-          entry.ungroupedReferences.push(row.reference);
+        if (!card.entries.has(entryKey)) {
+          card.entries.set(entryKey, {
+            title: row.entry,
+            referenceGroups: []
+          });
         }
+
+        const entry = card.entries.get(entryKey);
+        const displayVolume = Number(row.vol_grouped_ref_display_vol);
+        const volumeNumber =
+          Number.isInteger(displayVolume) &&
+          displayVolume >= 1 &&
+          displayVolume <= VOLUMES.length
+            ? displayVolume
+            : null;
+
+        entry.referenceGroups.push({
+          volumeNumber,
+          references: Array.from(row.references ?? [])
+        });
       }
 
       return [...sections.values()];
@@ -1500,17 +1526,28 @@
 
       view.results.replaceChildren();
 
-      const sections = groupRows(rows);
+      const sections = organizeResultRows(rows);
       const entryCount = sections.reduce(
-        (total, section) => total + section.entries.size,
+        (total, section) => total +
+          [...section.cards.values()].reduce(
+            (sectionTotal, card) => sectionTotal + card.entries.size,
+            0
+          ),
         0
       );
+      const referenceCount = rows.reduce((total, row) => {
+        const matchedRowCount = Number(row.matched_row_count);
+
+        return total + (
+          Number.isSafeInteger(matchedRowCount) ? matchedRowCount : 0
+        );
+      }, 0);
 
       view.kicker.textContent = kicker;
       view.title.textContent = title;
 
       view.count.textContent =
-        `${rows.length} ${rows.length === 1 ? "reference" : "references"} · ` +
+        `${referenceCount} ${referenceCount === 1 ? "reference" : "references"} · ` +
         `${entryCount} ${entryCount === 1 ? "entry" : "entries"} · ` +
         `${sections.length} ${sections.length === 1 ? "section" : "sections"}`;
 
@@ -1538,36 +1575,49 @@
         const entriesElement = document.createElement("div");
         entriesElement.className = "entries";
 
-        for (const entry of section.entries.values()) {
+        for (const card of section.cards.values()) {
           const article = document.createElement("article");
           article.className = "entry-card";
 
-          addMarkdown(
-            article,
-            "h3",
-            "entry-title",
-            entry.title
-          );
-
-          const volumeGroups = [...entry.referencesByVolume.entries()].sort(
-            ([left], [right]) => left - right
-          );
-
-          for (const [volumeNumber, references] of volumeGroups) {
-            appendReferenceGroup(
+          if (card.superEntry) {
+            addMarkdown(
               article,
-              VOLUMES[volumeNumber - 1],
-              references
+              "h3",
+              "super-entry-title",
+              card.superEntry
             );
           }
 
-          if (entry.ungroupedReferences.length > 0) {
-            appendReferenceGroup(
-              article,
-              "",
-              entry.ungroupedReferences
+          const entryElement = document.createElement("section");
+          entryElement.className = "entry-card-entry";
+
+          for (const entry of card.entries.values()) {
+            const entryItem = document.createElement("div");
+            entryItem.className = "entry-card-entry-item";
+
+            addMarkdown(
+              entryItem,
+              "h4",
+              "entry-title",
+              entry.title
             );
+
+            for (const { volumeNumber, references } of entry.referenceGroups) {
+              if (references.length === 0) {
+                continue;
+              }
+
+              appendReferenceGroup(
+                entryItem,
+                volumeNumber ? VOLUMES[volumeNumber - 1] : "",
+                references
+              );
+            }
+
+            entryElement.append(entryItem);
           }
+
+          article.append(entryElement);
 
           entriesElement.append(article);
         }
@@ -1611,26 +1661,6 @@
       });
     }
 
-    function displayReferenceVolumeSql() {
-      return `CASE
-        WHEN list_count(
-          list_distinct(
-            list_transform(
-              list_filter(
-                pages,
-                lambda p:
-                  NOT COALESCE(p.is_parenthesized, false)
-                  AND p.volume_number IS NOT NULL
-              ),
-              lambda p: p.volume_number
-            )
-          )
-        ) >= 3
-        THEN NULL
-        ELSE reference_volume
-      END`;
-    }
-
     async function searchByPage(volume, range, sectionKeys) {
       /*
        * The values interpolated below are safe:
@@ -1643,11 +1673,15 @@
       const sql = `
         SELECT
           section,
+          super_entry,
+          super_entry_index,
           entry_index,
           entry,
-          if(entry = reference, NULL, reference) AS reference,
-          reference_index,
-          if(entry = reference, NULL, ${displayReferenceVolumeSql()}) AS reference_volume
+          vol_grouped_ref_index,
+          vol_grouped_ref_display_vol,
+          list(reference ORDER BY reference_index)
+            FILTER (WHERE entry <> reference) AS references,
+          count(*) AS matched_row_count
         FROM guide
         WHERE list_bool_or(
           list_transform(
@@ -1659,7 +1693,8 @@
           )
         )
         ${sectionClause}
-        ORDER BY entry_index, reference_index
+        GROUP BY ALL
+        ORDER BY entry_index, vol_grouped_ref_index
       `;
 
       const table = await connection.query(sql);
@@ -1712,23 +1747,32 @@
       const sql = `
         SELECT
           section,
+          super_entry,
+          super_entry_index,
           entry_index,
           entry,
-          if(entry = reference, NULL, reference) AS reference,
-          reference_index,
-          if(entry = reference, NULL, ${displayReferenceVolumeSql()}) AS reference_volume
+          vol_grouped_ref_index,
+          vol_grouped_ref_display_vol,
+          list(reference ORDER BY reference_index)
+            FILTER (WHERE entry <> reference) AS references,
+          count(*) AS matched_row_count
         FROM guide
-        WHERE strip_accents(lower(entry)) LIKE
+        WHERE (
+          strip_accents(lower(entry)) LIKE
             '%' || strip_accents(lower(?)) || '%'
+          OR strip_accents(lower(super_entry)) LIKE
+            '%' || strip_accents(lower(?)) || '%'
+        )
           ${spoilerClause}
           ${sectionClause}
-        ORDER BY entry_index, reference_index
+        GROUP BY ALL
+        ORDER BY entry_index, vol_grouped_ref_index
       `;
 
       const statement = await connection.prepare(sql);
 
       try {
-        const table = await statement.query(name);
+        const table = await statement.query(name, name);
 
         return table.toArray().map((row) =>
           typeof row.toJSON === "function"
@@ -2043,11 +2087,13 @@
         const parquetUrl = new URL(
           `./${PARQUET_FILE}`,
           window.location.href
-        ).href;
+        );
+
+        parquetUrl.searchParams.set("schema", PARQUET_SCHEMA_VERSION);
 
         await database.registerFileURL(
           PARQUET_FILE,
-          parquetUrl,
+          parquetUrl.href,
           duckdb.DuckDBDataProtocol.HTTP,
           false
         );

@@ -1,5 +1,6 @@
 # %%
 import polars as pl
+import duckdb
 
 # %%
 # read the raw guide as lines_df
@@ -28,31 +29,31 @@ lines_df_2 = (
     .with_columns(section=pl.col("section").str.replace(r"^# ", ""))
 )
 
-# split grouped lines into separate rows
-# grouped lines are lines that start with "_" and contain multiple lines separated by "\n"
+# split super-entry lines into separate rows
+# super-entry lines are lines that start with "_" and contain multiple lines separated by a single "\n"
 lines_df = (
-    lines_df_2.with_row_index("group_index")
+    lines_df_2.with_row_index("super_entry_index")
     .with_columns(
-        is_grouped=pl.col("line").str.starts_with("_"),
+        is_super_entry=pl.col("line").str.starts_with("_"),
         lines=pl.col("line").str.split("\n"),
     )
     .with_columns(
-        group_lines=pl.when("is_grouped")
+        super_entry_lines=pl.when("is_super_entry")
         .then(
             pl.struct(
-                group=pl.col("lines").list.get(0),
+                super_entry=pl.col("lines").list.get(0),
                 line=pl.col("lines").list.slice(1),
             )
         )
         .otherwise(
             pl.struct(
-                group=None,
+                super_entry=None,
                 line=pl.concat_list(pl.col("lines").list.join(" ")),
             )
         )
     )
     .drop("line")
-    .unnest("group_lines")
+    .unnest("super_entry_lines")
     .explode("line", empty_as_null=True)
     .drop("lines")
 )
@@ -102,18 +103,18 @@ formatted_section_df = (
     entries_df.explode("references", empty_as_null=True)
     .select(
         "section",
-        "group_index",
+        "super_entry_index",
         "entry_index",
-        group=pl.when(pl.col("group").is_not_null())
-        .then(pl.lit("- ") + pl.col("group") + pl.lit("\n"))
+        super_entry=pl.when(pl.col("super_entry").is_not_null())
+        .then(pl.lit("- ") + pl.col("super_entry") + pl.lit("\n"))
         .otherwise(pl.lit("")),
-        entry=pl.when(pl.col("group").is_not_null())
+        entry=pl.when(pl.col("super_entry").is_not_null())
         .then(pl.lit("  "))
         .otherwise(pl.lit(""))
         + pl.lit("- ")
         + pl.col("entry")
         + pl.lit("\n"),
-        reference=pl.when(pl.col("group").is_not_null())
+        reference=pl.when(pl.col("super_entry").is_not_null())
         .then(pl.lit("  "))
         .otherwise(pl.lit(""))
         + pl.lit("  - ")
@@ -121,7 +122,7 @@ formatted_section_df = (
         + pl.lit("\n"),
     )
     .group_by(
-        "section", "group_index", "entry_index", "group", "entry", maintain_order=True
+        "section", "super_entry_index", "entry_index", "super_entry", "entry", maintain_order=True
     )
     .agg(
         references=pl.col("reference"),
@@ -129,10 +130,10 @@ formatted_section_df = (
     .with_columns(
         entry_detail=pl.col("entry") + pl.col("references").list.join(""),
     )
-    .group_by("section", "group_index", "group", maintain_order=True)
+    .group_by("section", "super_entry_index", "super_entry", maintain_order=True)
     .agg(entry_details=pl.col("entry_detail"))
     .with_columns(
-        group_detail=pl.col("group") + pl.col("entry_details").list.join(""),
+        group_detail=pl.col("super_entry") + pl.col("entry_details").list.join(""),
     )
     .group_by("section", maintain_order=True)
     .agg(group_details=pl.col("group_detail"))
@@ -261,8 +262,8 @@ fill_volume_pages_df = (
     )
     .group_by(
         "section",
-        "group",
-        "group_index",
+        "super_entry",
+        "super_entry_index",
         "entry",
         "entry_index",
         "reference",
@@ -291,4 +292,83 @@ fill_volume_pages_df = (
     )
 )
 
-fill_volume_pages_df.write_parquet("../a_guide_to_proust.parquet")
+# %%
+# determine volume-grouped index
+# to show results in a more condense format, all references of the under entry will be grouped to the previous one if and only if
+# 1. same lowest volume mentioned
+# 2. grouping together will not increased the number of volumes mentioned to exceed 2
+# e.g.
+# - previous references mention volume I, current reference metions volumes I and III -> group together
+# - previous references mention volumn I, current reference metions volume II
+#   -> NOT group together, since they don't have the same lowest volume mentioned
+# - previous references mention volume I and II, current reference metions volumes I and III
+#   -> NOT group together, otherwise the total volumes mentioned will be I, II, and III (exceeding 2)
+last_df_name = f'{fill_volume_pages_df=}'.split('=')[0]
+vol_grouped_refs_sql = f"""
+with recursive
+    ref_vols AS (
+        select
+            entry_index,
+            reference_index,
+            lag(reference_index) over (partition by entry_index order by reference_index) as last_ref,
+            list_sort(
+                list_distinct(
+                    list_transform(pages, lambda p: if(p.is_parenthesized, NULL, p.volume_number))
+                )
+            ) as vols,
+        from {last_df_name}
+    ),
+    vol_grouped_refs AS (
+        select
+            entry_index,
+            reference_index,
+            vols,
+            reference_index as vol_grouped_ref_index,
+        from ref_vols
+        where last_ref IS NULL
+
+        union all
+
+        select
+            ref_vols.entry_index,
+            ref_vols.reference_index,
+            case
+              when ifnull(list_min(ref_vols.vols) = list_min(vol_grouped_refs.vols), false)
+               and list_count(list_distinct(ref_vols.vols || vol_grouped_refs.vols)) < 3
+              then list_sort(list_distinct(ref_vols.vols || vol_grouped_refs.vols))
+              else ref_vols.vols
+            end as vols,
+            case
+              when ifnull(list_min(ref_vols.vols) = list_min(vol_grouped_refs.vols), false)
+               and list_count(list_distinct(ref_vols.vols || vol_grouped_refs.vols)) < 3
+              then vol_grouped_refs.vol_grouped_ref_index
+              else ref_vols.reference_index
+            end as vol_grouped_ref_index,
+        from ref_vols, vol_grouped_refs
+        where ref_vols.last_ref = vol_grouped_refs.reference_index
+    )
+select
+    main_df.*,
+    vol_grouped_refs.vol_grouped_ref_index,
+    if(list_count(vol_grouped_refs.vols) > 2, NULL, list_min(vol_grouped_refs.vols)) as vol_grouped_ref_display_vol,
+from {last_df_name} as main_df
+join vol_grouped_refs
+  using (entry_index, reference_index)
+order by entry_index, reference_index
+"""
+vol_grouped_ref_df = duckdb.execute(vol_grouped_refs_sql).pl()
+
+
+check_vol_grouped_ref_display_logic = duckdb.execute("""
+select
+    vol_grouped_ref_index,
+    list(distinct vol_grouped_ref_display_vol) vols
+from vol_grouped_ref_df
+group by all
+having list_count(vols) > 1
+""").pl()
+if not check_vol_grouped_ref_display_logic.is_empty():
+    raise ValueError('Error with the volume-grouped reference display logic. Some volume-grouped refereces have more than 1 displaying volumes.')
+
+# %%
+vol_grouped_ref_df.write_parquet("../a_guide_to_proust.parquet")

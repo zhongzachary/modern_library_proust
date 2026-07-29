@@ -1,6 +1,4 @@
 # %%
-from tabnanny import check
-
 import polars as pl
 import duckdb
 
@@ -31,31 +29,31 @@ lines_df_2 = (
     .with_columns(section=pl.col("section").str.replace(r"^# ", ""))
 )
 
-# split grouped lines into separate rows
-# grouped lines are lines that start with "_" and contain multiple lines separated by "\n"
+# split super-entry lines into separate rows
+# super-entry lines are lines that start with "_" and contain multiple lines separated by a single "\n"
 lines_df = (
-    lines_df_2.with_row_index("group_index")
+    lines_df_2.with_row_index("super_entry_index")
     .with_columns(
-        is_grouped=pl.col("line").str.starts_with("_"),
+        is_super_entry=pl.col("line").str.starts_with("_"),
         lines=pl.col("line").str.split("\n"),
     )
     .with_columns(
-        group_lines=pl.when("is_grouped")
+        super_entry_lines=pl.when("is_super_entry")
         .then(
             pl.struct(
-                group=pl.col("lines").list.get(0),
+                super_entry=pl.col("lines").list.get(0),
                 line=pl.col("lines").list.slice(1),
             )
         )
         .otherwise(
             pl.struct(
-                group=None,
+                super_entry=None,
                 line=pl.concat_list(pl.col("lines").list.join(" ")),
             )
         )
     )
     .drop("line")
-    .unnest("group_lines")
+    .unnest("super_entry_lines")
     .explode("line", empty_as_null=True)
     .drop("lines")
 )
@@ -105,18 +103,18 @@ formatted_section_df = (
     entries_df.explode("references", empty_as_null=True)
     .select(
         "section",
-        "group_index",
+        "super_entry_index",
         "entry_index",
-        group=pl.when(pl.col("group").is_not_null())
-        .then(pl.lit("- ") + pl.col("group") + pl.lit("\n"))
+        super_entry=pl.when(pl.col("super_entry").is_not_null())
+        .then(pl.lit("- ") + pl.col("super_entry") + pl.lit("\n"))
         .otherwise(pl.lit("")),
-        entry=pl.when(pl.col("group").is_not_null())
+        entry=pl.when(pl.col("super_entry").is_not_null())
         .then(pl.lit("  "))
         .otherwise(pl.lit(""))
         + pl.lit("- ")
         + pl.col("entry")
         + pl.lit("\n"),
-        reference=pl.when(pl.col("group").is_not_null())
+        reference=pl.when(pl.col("super_entry").is_not_null())
         .then(pl.lit("  "))
         .otherwise(pl.lit(""))
         + pl.lit("  - ")
@@ -124,7 +122,7 @@ formatted_section_df = (
         + pl.lit("\n"),
     )
     .group_by(
-        "section", "group_index", "entry_index", "group", "entry", maintain_order=True
+        "section", "super_entry_index", "entry_index", "super_entry", "entry", maintain_order=True
     )
     .agg(
         references=pl.col("reference"),
@@ -132,10 +130,10 @@ formatted_section_df = (
     .with_columns(
         entry_detail=pl.col("entry") + pl.col("references").list.join(""),
     )
-    .group_by("section", "group_index", "group", maintain_order=True)
+    .group_by("section", "super_entry_index", "super_entry", maintain_order=True)
     .agg(entry_details=pl.col("entry_detail"))
     .with_columns(
-        group_detail=pl.col("group") + pl.col("entry_details").list.join(""),
+        group_detail=pl.col("super_entry") + pl.col("entry_details").list.join(""),
     )
     .group_by("section", maintain_order=True)
     .agg(group_details=pl.col("group_detail"))
@@ -264,8 +262,8 @@ fill_volume_pages_df = (
     )
     .group_by(
         "section",
-        "group",
-        "group_index",
+        "super_entry",
+        "super_entry_index",
         "entry",
         "entry_index",
         "reference",

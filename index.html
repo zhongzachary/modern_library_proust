@@ -1396,7 +1396,10 @@
 
     function addMarkdown(parent, tag, className, markdown) {
       const element = document.createElement(tag);
-      const typographicMarkdown = (markdown ?? "").replace(/--/g, "–");
+      const typographicMarkdown = (markdown ?? "").replace(
+        /---|--/g,
+        (dashes) => (dashes === "---" ? "—" : "–")
+      );
       const rendered = markdownParser.parseInline(typographicMarkdown);
 
       element.className = className;

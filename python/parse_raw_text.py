@@ -1,6 +1,6 @@
 # %%
-import polars as pl
 import duckdb
+import polars as pl
 
 # %%
 # read the raw guide as lines_df
@@ -122,7 +122,12 @@ formatted_section_df = (
         + pl.lit("\n"),
     )
     .group_by(
-        "section", "super_entry_index", "entry_index", "super_entry", "entry", maintain_order=True
+        "section",
+        "super_entry_index",
+        "entry_index",
+        "super_entry",
+        "entry",
+        maintain_order=True,
     )
     .agg(
         references=pl.col("reference"),
@@ -303,7 +308,7 @@ fill_volume_pages_df = (
 #   -> NOT group together, since they don't have the same lowest volume mentioned
 # - previous references mention volume I and II, current reference metions volumes I and III
 #   -> NOT group together, otherwise the total volumes mentioned will be I, II, and III (exceeding 2)
-last_df_name = f'{fill_volume_pages_df=}'.split('=')[0]
+last_df_name = f"{fill_volume_pages_df=}".split("=")[0]
 vol_grouped_refs_sql = f"""
 with recursive
     ref_vols AS (
@@ -368,7 +373,9 @@ group by all
 having list_count(vols) > 1
 """).pl()
 if not check_vol_grouped_ref_display_logic.is_empty():
-    raise ValueError('Error with the volume-grouped reference display logic. Some volume-grouped refereces have more than 1 displaying volumes.')
+    raise ValueError(
+        "Error with the volume-grouped reference display logic. Some volume-grouped refereces have more than 1 displaying volumes."
+    )
 
 # %%
 vol_grouped_ref_df.write_parquet("../a_guide_to_proust.parquet")

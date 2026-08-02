@@ -57,7 +57,7 @@
     /* Header */
 
     header {
-      padding: 42px 0 26px;
+      padding: 24px 0 26px;
       text-align: center;
     }
 
@@ -82,6 +82,86 @@
       margin: 16px auto 0;
       color: var(--muted);
       font-size: 1.1rem;
+    }
+
+    /* Guide information */
+
+    .utility-bar {
+      min-height: 30px;
+    }
+
+    .utility-bar-inner {
+      display: flex;
+      min-height: inherit;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .info-control {
+      position: relative;
+      z-index: 20;
+    }
+
+    .info-button,
+    .info-close {
+      border: 1px solid var(--accent);
+      border-radius: 3px;
+      background: var(--card);
+      color: var(--accent);
+      cursor: pointer;
+      font: 700 0.66rem/1 system-ui, sans-serif;
+    }
+
+    .info-button {
+      display: inline-flex;
+      min-height: 24px;
+      align-items: center;
+      gap: 6px;
+      padding: 0 7px;
+    }
+
+    .info-button:hover,
+    .info-close:hover {
+      background: var(--accent);
+      color: white;
+    }
+
+    .info-button:focus-visible,
+    .info-close:focus-visible {
+      outline: 3px solid #7c302940;
+      outline-offset: 3px;
+    }
+
+    .info-button svg {
+      width: 13px;
+      height: 13px;
+      fill: currentColor;
+    }
+
+    .info-popover {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: min(390px, calc(100vw - 32px));
+      padding: 18px;
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      background: var(--card);
+      box-shadow: 0 8px 28px #3b2b1b26;
+      color: var(--ink);
+      font-size: 0.96rem;
+      line-height: 1.5;
+    }
+
+    .info-popover p {
+      margin: 0;
+    }
+
+    .info-close {
+      float: right;
+      min-height: 30px;
+      margin: -3px -3px 8px 12px;
+      padding: 0 8px;
     }
 
     /* Search */
@@ -634,7 +714,7 @@
 
     @media (max-width: 720px) {
       header {
-        padding-top: 34px;
+        padding-top: 24px;
       }
 
       .search-tabs {
@@ -704,6 +784,32 @@
 </head>
 
 <body>
+  <div class="utility-bar">
+    <div class="shell utility-bar-inner">
+      <div class="info-control">
+        <button
+          id="info-button"
+          class="info-button"
+          type="button"
+          aria-expanded="false"
+          aria-controls="info-popover"
+        >
+          <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path d="M8 1.25a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5Zm.9 10.4H7.1V6.8h1.8v4.85ZM8 5.55a1.05 1.05 0 1 1 0-2.1 1.05 1.05 0 0 1 0 2.1Z"></path>
+          </svg>
+          Info
+        </button>
+
+        <div id="info-popover" class="info-popover" role="region" aria-label="About this guide" hidden>
+          <button id="info-close" class="info-close" type="button">Close</button>
+          <p>
+            This site is based on <em>A Guide to Proust</em> complied by Terence Kilmartin and revised by Joanna Kilmartin. It is included in Volume VI of Modern Library's <em>In Search of Lost Time</em>. It is to provide a mostly spoiler-free way to look up entries in the <em>Guide</em>, by only displaying those that reference the paged you've read. Unfortunately, <strong>spoilers might still show up occassionally.</strong>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <header class="shell">
     <h1>A Guide to Proust</h1>
 
@@ -1131,6 +1237,9 @@
       ...document.querySelectorAll('input[name="page-section"]')
     ];
     const status = document.querySelector("#status");
+    const infoButton = document.querySelector("#info-button");
+    const infoPopover = document.querySelector("#info-popover");
+    const infoCloseButton = document.querySelector("#info-close");
     const backToTopButton = document.querySelector("#back-to-top");
     const resultViews = new Map(
       ["entry", "page"].map((mode) => {
@@ -2159,6 +2268,31 @@
 
     backToTopButton.addEventListener("click", () => {
       window.scrollTo({ top: 0, left: 0 });
+    });
+
+    function setInfoPopoverOpen(open) {
+      infoPopover.hidden = !open;
+      infoButton.setAttribute("aria-expanded", String(open));
+
+      if (open) {
+        infoCloseButton.focus();
+      } else {
+        infoButton.focus();
+      }
+    }
+
+    infoButton.addEventListener("click", () => {
+      setInfoPopoverOpen(infoPopover.hidden);
+    });
+
+    infoCloseButton.addEventListener("click", () => {
+      setInfoPopoverOpen(false);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !infoPopover.hidden) {
+        setInfoPopoverOpen(false);
+      }
     });
 
     const initialUrlState = hydrateInputsFromUrl();
